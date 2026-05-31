@@ -100,10 +100,10 @@ export default function TestingSuite({
 
   if (!prompt) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 glass-pane border border-white/5 text-center rounded-3xl min-h-[400px]">
+      <div className="flex flex-col items-center justify-center p-12 glass-pane border border-glass text-center rounded-3xl min-h-[400px]">
         <PlaySquare className="h-12 w-12 text-white/30 mb-4 animate-pulse" />
-        <h3 className="text-lg font-syne font-black uppercase tracking-wider text-[#EDF2FF]">No Prompt Active</h3>
-        <p className="max-w-md text-xs text-[#9BAAD4]/60 tracking-wide mt-3 uppercase font-semibold">
+        <h3 className="text-lg font-syne font-black uppercase tracking-wider text-brand-primary">No Prompt Active</h3>
+        <p className="max-w-md text-xs text-brand-muted/60 tracking-wide mt-3 uppercase font-semibold">
           Compile an optimized prompt first to unlock autonomous self-testing suites.
         </p>
       </div>
@@ -192,11 +192,11 @@ export default function TestingSuite({
       <div className="col-span-1 space-y-6">
         
         {/* Model Comparer configuration section */}
-        <div className="rounded-3xl border border-white/5 glass-pane p-6 shadow-sm space-y-4">
-          <span className="text-[10px] font-mono font-bold text-[#10b981] uppercase tracking-[0.25em] block border-b border-white/10 pb-3 select-none">
+        <div className="rounded-3xl border border-glass glass-pane p-6 shadow-sm space-y-4">
+          <span className="text-[10px] font-mono font-bold text-[#10b981] uppercase tracking-[0.25em] block border-b border-glass pb-3 select-none">
             Comparison Model Selection
           </span>
-          <p className="text-[10px] text-[#9BAAD4]/60 leading-relaxed uppercase font-black select-none">
+          <p className="text-[10px] text-brand-muted/60 leading-relaxed uppercase font-black select-none">
             Select multiple model targets below to compare their responses and constraint-adherence side-by-side:
           </p>
           <div className="space-y-2">
@@ -208,7 +208,7 @@ export default function TestingSuite({
                   className={`flex items-center justify-between p-3 rounded-2xl border text-[10px] font-extrabold uppercase tracking-widest cursor-pointer transition-all ${
                     checked
                       ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-black shadow-inner"
-                      : "bg-[#040910]/45 border-transparent text-[#9BAAD4]/50 hover:bg-[#07101f]/60 hover:text-[#EDF2FF]"
+                      : "bg-brand-deep/45 border-transparent text-brand-muted/50 hover:bg-[#07101f]/60 hover:text-brand-primary"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -217,7 +217,7 @@ export default function TestingSuite({
                       checked={checked}
                       onChange={() => handleCheckboxChange(m.id)}
                       disabled={isRunning}
-                      className="rounded border-white/10 bg-white/5 text-emerald-500 focus:ring-emerald-500 h-3.5 w-3.5 cursor-pointer"
+                      className="rounded border-glass bg-white/5 text-emerald-500 focus:ring-emerald-500 h-3.5 w-3.5 cursor-pointer"
                     />
                     <span>{m.name}</span>
                   </div>
@@ -234,15 +234,15 @@ export default function TestingSuite({
           </div>
         </div>
 
-        <div className="rounded-3xl border border-white/5 glass-pane p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3 select-none">
-            <span className="text-[10px] font-mono font-bold text-[#9BAAD4]/50 uppercase tracking-[0.25em] flex items-center gap-1.5">
+        <div className="rounded-3xl border border-glass glass-pane p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-glass pb-3 select-none">
+            <span className="text-[10px] font-mono font-bold text-brand-muted/50 uppercase tracking-[0.25em] flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-emerald-500" /> QA Test Cases
             </span>
             <button
               onClick={startAutonomousGeneration}
               disabled={isRunning}
-              className="text-[10px] font-mono font-extrabold uppercase text-[#EDF2FF] hover:text-[#EDF2FF]/80 transition-all flex items-center gap-0.5 disabled:opacity-50 cursor-pointer"
+              className="text-[10px] font-mono font-extrabold uppercase text-brand-primary hover:text-brand-primary/80 transition-all flex items-center gap-0.5 disabled:opacity-50 cursor-pointer"
               title="Generate 3 edge stress cases using Gemini"
             >
               <Wand2 className="h-3.5 w-3.5 mr-1 text-emerald-400" />
@@ -253,14 +253,14 @@ export default function TestingSuite({
           {/* Scenarios List view */}
           <div className="space-y-2.5 max-h-48 overflow-y-auto">
             {scenarios.length === 0 ? (
-              <p className="text-[10px] text-[#9BAAD4]/40 italic uppercase tracking-wider font-semibold font-mono leading-relaxed">No custom test scenarios recorded. Add one below or trigger &apos;Auto Gen QA&apos; to proceed autonomously.</p>
+              <p className="text-[10px] text-brand-muted/40 italic uppercase tracking-wider font-semibold font-mono leading-relaxed">No custom test scenarios recorded. Add one below or trigger &apos;Auto Gen QA&apos; to proceed autonomously.</p>
             ) : (
               scenarios.map((sc) => (
-                <div key={sc.id} className="p-3.5 rounded-xl border border-white/5 bg-[#040910]/45 relative group">
-                  <p className="text-xs font-bold text-[#EDF2FF] uppercase tracking-wider font-syne">{sc.name}</p>
-                  <div className="mt-2 space-y-1 border-t border-white/5 pt-2">
+                <div key={sc.id} className="p-3.5 rounded-xl border border-glass bg-brand-deep/45 relative group">
+                  <p className="text-xs font-bold text-brand-primary uppercase tracking-wider font-syne">{sc.name}</p>
+                  <div className="mt-2 space-y-1 border-t border-glass pt-2">
                     {Object.entries(sc.inputs).map(([k, v]) => (
-                      <p key={k} className="text-[10px] font-mono text-[#9BAAD4]/60 truncate">
+                      <p key={k} className="text-[10px] font-mono text-brand-muted/60 truncate">
                         <strong className="text-emerald-400 tracking-wider uppercase font-extrabold">{k}</strong>: {v}
                       </p>
                     ))}
@@ -306,7 +306,7 @@ export default function TestingSuite({
                       />
                     ))}
                   </div>
-                  <div className="flex justify-between text-[8px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest select-none">
+                  <div className="flex justify-between text-[8px] font-mono text-brand-muted/40 uppercase tracking-widest select-none">
                     <span>Stage {progressStage + 1}/{PIPELINE_STAGES.length}</span>
                     <span className="text-emerald-400/60">{PIPELINE_STAGES[progressStage]}</span>
                   </div>
@@ -317,50 +317,50 @@ export default function TestingSuite({
         </div>
 
         {/* Custom manual test case builder */}
-        <div className="rounded-3xl border border-white/5 glass-pane p-6 shadow-sm">
-          <span className="text-[10px] font-mono text-[#9BAAD4]/50 uppercase tracking-[0.25em] block border-b border-white/5 pb-3 mb-4 select-none">
+        <div className="rounded-3xl border border-glass glass-pane p-6 shadow-sm">
+          <span className="text-[10px] font-mono text-brand-muted/50 uppercase tracking-[0.25em] block border-b border-glass pb-3 mb-4 select-none">
             Add Custom Stress Case
           </span>
           <form onSubmit={handleCreateScenario} className="space-y-4 text-xs">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest block font-bold">Scenario Name / Case</label>
+              <label className="text-[10px] font-mono text-brand-muted/40 uppercase tracking-widest block font-bold">Scenario Name / Case</label>
               <input
                 type="text"
                 required
                 value={newScenarioName}
                 onChange={(e) => setNewScenarioName(e.target.value)}
                 placeholder="e.g., Extreme Input Edge-case"
-                className="w-full rounded-xl focus:outline-none px-4 py-2.5 glass-pane-input text-[#EDF2FF] uppercase placeholder:text-[#9BAAD4]/30 tracking-wider font-extrabold transition-all"
+                className="w-full rounded-xl focus:outline-none px-4 py-2.5 glass-pane-input text-brand-primary uppercase placeholder:text-brand-muted/30 tracking-wider font-extrabold transition-all"
               />
             </div>
 
             {prompt.variables.map((v) => (
               <div key={v} className="space-y-1.5">
-                <label className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest block font-bold">Parameter: {v}</label>
+                <label className="text-[10px] font-mono text-brand-muted/40 uppercase tracking-widest block font-bold">Parameter: {v}</label>
                 <input
                   type="text"
                   required
                   placeholder={`Insert content for ${v}...`}
                   value={customInputs[v] || ""}
                   onChange={(e) => setCustomInputs({ ...customInputs, [v]: e.target.value })}
-                  className="w-full rounded-xl focus:outline-none px-4 py-2.5 glass-pane-input text-[#EDF2FF] uppercase placeholder:text-[#9BAAD4]/30 tracking-wider font-extrabold transition-all"
+                  className="w-full rounded-xl focus:outline-none px-4 py-2.5 glass-pane-input text-brand-primary uppercase placeholder:text-brand-muted/30 tracking-wider font-extrabold transition-all"
                 />
               </div>
             ))}
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest block font-bold">Audit Validation Rules (New lines)</label>
+              <label className="text-[10px] font-mono text-brand-muted/40 uppercase tracking-widest block font-bold">Audit Validation Rules (New lines)</label>
               <textarea
                 value={customCriteria}
                 onChange={(e) => setCustomCriteria(e.target.value)}
                 placeholder={"e.g. Tone must remain apologetic\nNo markdown list formats permitted"}
-                className="w-full rounded-xl focus:outline-none px-4 py-2.5 h-20 glass-pane-input text-[#EDF2FF] font-mono uppercase placeholder:text-[#9BAAD4]/30 tracking-wider font-extrabold text-[10px] transition-all"
+                className="w-full rounded-xl focus:outline-none px-4 py-2.5 h-20 glass-pane-input text-brand-primary font-mono uppercase placeholder:text-brand-muted/30 tracking-wider font-extrabold text-[10px] transition-all"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#EDF2FF] hover:bg-emerald-500 text-black hover:scale-[1.01] transition-all font-black text-2xs uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer tactile-glow"
+              className="w-full bg-accent-mint hover:bg-emerald-500 text-black hover:scale-[1.01] transition-all font-black text-2xs uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer tactile-glow"
             >
               <Plus className="h-4 w-4" /> Add Case
             </button>
@@ -370,12 +370,12 @@ export default function TestingSuite({
 
       {/* Stress testing console reports */}
       <div className="col-span-1 lg:col-span-2 space-y-4">
-        <div className="rounded-3xl border border-white/5 glass-pane p-6 shadow-sm min-h-[500px] flex flex-col justify-start space-y-4">
-          <div className="flex items-center gap-3 border-b border-white/5 pb-3 select-none">
+        <div className="rounded-3xl border border-glass glass-pane p-6 shadow-sm min-h-[500px] flex flex-col justify-start space-y-4">
+          <div className="flex items-center gap-3 border-b border-glass pb-3 select-none">
             <Terminal className="h-5 w-5 text-emerald-500 animate-pulse" />
             <div>
-              <h4 className="text-sm font-bold text-[#EDF2FF] uppercase tracking-wider font-syne">Evaluation Audit Console Logs</h4>
-              <p className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest">Autonomous criteria checklists audits</p>
+              <h4 className="text-sm font-bold text-brand-primary uppercase tracking-wider font-syne">Evaluation Audit Console Logs</h4>
+              <p className="text-[10px] font-mono text-brand-muted/40 uppercase tracking-widest">Autonomous criteria checklists audits</p>
             </div>
           </div>
 
@@ -385,8 +385,8 @@ export default function TestingSuite({
               <div className="flex gap-2.5 items-start">
                 <ShieldAlert className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-[#EDF2FF] uppercase tracking-wide">Weak Constraint Compliance Detected</p>
-                  <p className="text-[10px] font-mono text-[#9BAAD4]/60 uppercase tracking-wider">
+                  <p className="text-xs font-bold text-brand-primary uppercase tracking-wide">Weak Constraint Compliance Detected</p>
+                  <p className="text-[10px] font-mono text-brand-muted/60 uppercase tracking-wider">
                     One or more comparative test cases failed criteria audits. Enable autonomous correction loops to repair the active prompt template v{prompt.version}.
                   </p>
                 </div>
@@ -404,10 +404,10 @@ export default function TestingSuite({
           {isRunning && (
             <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
               <RefreshCw className="h-10 w-10 text-emerald-500 animate-spin" />
-              <p className="text-sm text-[#EDF2FF] font-bold uppercase tracking-wider animate-pulse font-syne">
+              <p className="text-sm text-brand-primary font-bold uppercase tracking-wider animate-pulse font-syne">
                 Running comparative diagnostics &amp; scoring execution outputs...
               </p>
-              <p className="text-[10px] font-mono text-[#9BAAD4]/40 max-w-md leading-relaxed uppercase tracking-wider">
+              <p className="text-[10px] font-mono text-brand-muted/40 max-w-md leading-relaxed uppercase tracking-wider">
                 Evaluating side-by-side across the selected model configurations. This takes sequential steps for comprehensive audits.
               </p>
             </div>
@@ -415,9 +415,9 @@ export default function TestingSuite({
 
           {!isRunning && testRuns.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <PlaySquare className="h-12 w-12 text-[#9BAAD4]/20 mb-3" />
-              <p className="text-xs text-[#9BAAD4]/40 uppercase font-extrabold tracking-wider">No active audit logs recorded in current session</p>
-              <p className="text-[10px] font-mono text-[#9BAAD4]/30 mt-2 max-w-sm uppercase tracking-wider leading-relaxed">
+              <PlaySquare className="h-12 w-12 text-brand-muted/20 mb-3" />
+              <p className="text-xs text-brand-muted/40 uppercase font-extrabold tracking-wider">No active audit logs recorded in current session</p>
+              <p className="text-[10px] font-mono text-brand-muted/30 mt-2 max-w-sm uppercase tracking-wider leading-relaxed">
                 Create custom stress cases or run &quot;Auto Gen QA&quot; to evaluate constraint safety boundaries.
               </p>
             </div>
@@ -438,18 +438,18 @@ export default function TestingSuite({
                 {Object.entries(groupedRuns).map(([scenarioName, runs]) => {
                   const firstRun = runs[0];
                   return (
-                    <div key={scenarioName} className="rounded-2xl border border-white/5 bg-[#040910]/45 overflow-hidden space-y-4 p-5 hover:border-emerald-550/25 transition-all">
-                      <div className="border-b border-white/5 pb-3">
+                    <div key={scenarioName} className="rounded-2xl border border-glass bg-brand-deep/45 overflow-hidden space-y-4 p-5 hover:border-emerald-550/25 transition-all">
+                      <div className="border-b border-glass pb-3">
                         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-[0.2em] block font-black mb-1">Comparative QA Scenario</span>
-                        <h4 className="text-sm font-black text-[#EDF2FF] uppercase tracking-wider font-syne">{scenarioName}</h4>
+                        <h4 className="text-sm font-black text-brand-primary uppercase tracking-wider font-syne">{scenarioName}</h4>
                       </div>
 
                       <div className="space-y-1.5">
-                        <span className="text-[9px] font-mono text-[#9BAAD4]/40 uppercase tracking-wider block font-bold">Hydrated Test Variables Input:</span>
-                        <div className="rounded-xl p-3 bg-[#040910]/85 text-emerald-400 font-mono text-[9px] border border-white/5 uppercase font-bold leading-relaxed">
+                        <span className="text-[9px] font-mono text-brand-muted/40 uppercase tracking-wider block font-bold">Hydrated Test Variables Input:</span>
+                        <div className="rounded-xl p-3 bg-brand-deep/85 text-emerald-400 font-mono text-[9px] border border-glass uppercase font-bold leading-relaxed">
                           {Object.entries(firstRun.inputs || {}).map(([k, v]) => (
                             <div key={k} className="flex gap-2">
-                              <span className="text-[#9BAAD4]/40 select-none mr-2">{k}:</span>
+                              <span className="text-brand-muted/40 select-none mr-2">{k}:</span>
                               <span className="text-white/80">{String(v)}</span>
                             </div>
                           ))}
@@ -463,13 +463,13 @@ export default function TestingSuite({
                           const isPartial = r.evalVerdict === "partial";
 
                           return (
-                            <div key={runIdx} className="rounded-xl border border-white/5 bg-[#07101f]/35 p-4 space-y-3 font-sans">
-                              <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                                <span className="font-mono text-[9px] font-black text-[#EDF2FF] uppercase tracking-tight truncate max-w-[150px]">
+                            <div key={runIdx} className="rounded-xl border border-glass bg-[#07101f]/35 p-4 space-y-3 font-sans">
+                              <div className="flex justify-between items-center border-b border-glass pb-2">
+                                <span className="font-mono text-[9px] font-black text-brand-primary uppercase tracking-tight truncate max-w-[150px]">
                                   {r.model || "gemini-3.5-flash"}
                                 </span>
                                 <div className="flex items-center gap-1.5 shrink-0">
-                                  <span className="text-[9px] font-mono text-[#9BAAD4]/40 font-bold">
+                                  <span className="text-[9px] font-mono text-brand-muted/40 font-bold">
                                     Grade: <span className="text-emerald-400 font-mono text-[10px]">{r.score}/100</span>
                                   </span>
                                   {isSuccess && (
@@ -491,14 +491,14 @@ export default function TestingSuite({
                               </div>
 
                               <div className="space-y-1">
-                                <span className="text-[8.5px] font-mono text-[#9BAAD4]/30 uppercase tracking-widest block select-none">Output Response</span>
-                                <pre className="p-3 bg-[#040910]/75 text-slate-200 text-3xs font-mono rounded-xl border border-white/5 h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed select-all shadow-inner">
+                                <span className="text-[8.5px] font-mono text-brand-muted/30 uppercase tracking-widest block select-none">Output Response</span>
+                                <pre className="p-3 bg-brand-deep/75 text-slate-200 text-3xs font-mono rounded-xl border border-glass h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed select-all shadow-inner">
                                   {r.output}
                                 </pre>
                               </div>
 
-                              <div className="space-y-1 bg-[#040910]/65 p-3 rounded-xl border border-white/5 leading-relaxed">
-                                <span className="text-[8.5px] font-mono text-[#9BAAD4]/30 uppercase tracking-widest block font-bold select-none font-sans">QA Verifier Report</span>
+                              <div className="space-y-1 bg-brand-deep/65 p-3 rounded-xl border border-glass leading-relaxed">
+                                <span className="text-[8.5px] font-mono text-brand-muted/30 uppercase tracking-widest block font-bold select-none font-sans">QA Verifier Report</span>
                                 <p className="text-[9px] font-mono italic text-white/70 leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap">
                                   {r.explanation}
                                 </p>
@@ -518,21 +518,21 @@ export default function TestingSuite({
 
       {isSelfCorrectingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in font-sans">
-          <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-[#040812] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="w-full max-w-5xl rounded-3xl border border-glass bg-[#040812] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#070f21]/70 select-none">
+            <div className="p-6 border-b border-glass flex justify-between items-center bg-[#070f21]/70 select-none">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-pulse">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-md font-bold text-[#EDF2FF] uppercase tracking-wider font-syne">Synthetic Prompt Self-Correction Core</h3>
-                  <p className="text-[10px] font-mono text-[#9BAAD4]/50 uppercase tracking-widest">Autonomous Diagnostic and Corrective Loops</p>
+                  <h3 className="text-md font-bold text-brand-primary uppercase tracking-wider font-syne">Synthetic Prompt Self-Correction Core</h3>
+                  <p className="text-[10px] font-mono text-brand-muted/50 uppercase tracking-widest">Autonomous Diagnostic and Corrective Loops</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsSelfCorrectingModalOpen(false)}
-                className="p-1 text-[#9BAAD4]/50 hover:text-[#EDF2FF] transition-all cursor-pointer"
+                className="p-1 text-brand-muted/50 hover:text-brand-primary transition-all cursor-pointer"
               >
                 <XCircle className="h-5 w-5" />
               </button>
@@ -547,8 +547,8 @@ export default function TestingSuite({
                     <Sparkles className="h-6 w-6 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
                   </div>
                   <div>
-                    <h4 className="text-md font-bold text-[#EDF2FF] uppercase tracking-wider font-syne">Synthesizing Safety Correctives...</h4>
-                    <p className="text-xs text-[#9BAAD4]/60 max-w-md mx-auto leading-relaxed mt-2 uppercase tracking-wide">
+                    <h4 className="text-md font-bold text-brand-primary uppercase tracking-wider font-syne">Synthesizing Safety Correctives...</h4>
+                    <p className="text-xs text-brand-muted/60 max-w-md mx-auto leading-relaxed mt-2 uppercase tracking-wide">
                       Tracing semantic defects, parsing audit criteria, and generating instruction overrides to repair compliance failure modes.
                     </p>
                   </div>
@@ -561,7 +561,7 @@ export default function TestingSuite({
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span>2. Map Logical Ambiguities: DONE</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[#9BAAD4]/80">
+                    <div className="flex items-center gap-2 text-brand-muted/80">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
                       <span>3. Draft Instruction Patch: RUNNING</span>
                     </div>
@@ -573,10 +573,10 @@ export default function TestingSuite({
                 <div className="text-center py-16 space-y-4">
                   <AlertCircle className="h-12 w-12 text-red-500 mx-auto animate-bounce" />
                   <p className="text-sm font-bold text-red-400 uppercase tracking-wider font-syne">Failed to generate self-correction patch</p>
-                  <p className="text-[10px] font-mono text-[#9BAAD4]/70">{correctionError}</p>
+                  <p className="text-[10px] font-mono text-brand-muted/70">{correctionError}</p>
                   <button
                     onClick={triggerSelfCorrectionProcess}
-                    className="bg-[#EDF2FF] text-black hover:bg-emerald-500 hover:text-black hover:scale-102 transition-all px-4 py-2 rounded-xl text-xs uppercase font-extrabold tracking-widest cursor-pointer"
+                    className="bg-accent-mint text-black hover:bg-emerald-500 hover:text-black hover:scale-102 transition-all px-4 py-2 rounded-xl text-xs uppercase font-extrabold tracking-widest cursor-pointer"
                   >
                     Retry Handshake
                   </button>
@@ -591,8 +591,8 @@ export default function TestingSuite({
                       <span className="text-[10px] font-mono uppercase text-red-400 font-bold tracking-wider block">Observed Bug Behavior</span>
                       <p className="text-xs text-white/80 font-medium leading-relaxed uppercase">{selfCorrectionResult.diagnosis}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1.5 leading-relaxed">
-                      <span className="text-[10px] font-mono uppercase text-[#9BAAD4]/60 font-bold tracking-wider block">Diagnostics Root Cause</span>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-glass space-y-1.5 leading-relaxed">
+                      <span className="text-[10px] font-mono uppercase text-brand-muted/60 font-bold tracking-wider block">Diagnostics Root Cause</span>
                       <p className="text-xs text-white/80 font-medium leading-relaxed uppercase">{selfCorrectionResult.rootCause}</p>
                     </div>
                   </div>
@@ -610,7 +610,7 @@ export default function TestingSuite({
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-mono uppercase text-[#9BAAD4]/50 tracking-wider">
+                    <div className="flex justify-between items-center text-[10px] font-mono uppercase text-brand-muted/50 tracking-wider">
                       <span>Interactive System Instructions Side-by-Side</span>
                       <span className="text-emerald-400 font-bold">New Version: v{selfCorrectionResult.patchedPrompt.version}</span>
                     </div>
@@ -630,19 +630,19 @@ export default function TestingSuite({
                     </div>
                   </div>
 
-                  <div className="p-4 bg-[#070f21]/70 border border-white/5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="p-4 bg-[#070f21]/70 border border-glass rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex gap-4 text-xs font-mono">
                       <div>
-                        <span className="text-[#9BAAD4]/40 uppercase text-[9px] block">Clarity Score</span>
-                        <span className="text-[#EDF2FF] font-black">{selfCorrectionResult.patchedPrompt.scores?.clarity || 90}%</span>
+                        <span className="text-brand-muted/40 uppercase text-[9px] block">Clarity Score</span>
+                        <span className="text-brand-primary font-black">{selfCorrectionResult.patchedPrompt.scores?.clarity || 90}%</span>
                       </div>
                       <div>
-                        <span className="text-[#9BAAD4]/40 uppercase text-[9px] block">Constraint Safety</span>
+                        <span className="text-brand-muted/40 uppercase text-[9px] block">Constraint Safety</span>
                         <span className="text-emerald-400 font-extrabold">{selfCorrectionResult.patchedPrompt.scores?.constraintAdherence || 95}%</span>
                       </div>
                       <div>
-                        <span className="text-[#9BAAD4]/40 uppercase text-[9px] block">Overall Grade</span>
-                        <span className="text-[#EDF2FF] font-black">{selfCorrectionResult.patchedPrompt.scores?.overall || 95}%</span>
+                        <span className="text-brand-muted/40 uppercase text-[9px] block">Overall Grade</span>
+                        <span className="text-brand-primary font-black">{selfCorrectionResult.patchedPrompt.scores?.overall || 95}%</span>
                       </div>
                     </div>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-bold">
@@ -656,10 +656,10 @@ export default function TestingSuite({
             </div>
 
             {selfCorrectionState === "preview" && (
-              <div className="p-6 border-t border-white/5 bg-[#070f21]/40 flex justify-end gap-3 select-none">
+              <div className="p-6 border-t border-glass bg-[#070f21]/40 flex justify-end gap-3 select-none">
                 <button
                   onClick={() => setIsSelfCorrectingModalOpen(false)}
-                  className="bg-transparent border border-white/10 hover:border-white/20 text-[#9BAAD4] hover:text-[#EDF2FF] px-5 py-2.5 rounded-xl text-xs uppercase font-extrabold tracking-widest transition-all cursor-pointer"
+                  className="bg-transparent border border-glass hover:border-white/20 text-brand-muted hover:text-brand-primary px-5 py-2.5 rounded-xl text-xs uppercase font-extrabold tracking-widest transition-all cursor-pointer"
                 >
                   Reject &amp; Cancel
                 </button>

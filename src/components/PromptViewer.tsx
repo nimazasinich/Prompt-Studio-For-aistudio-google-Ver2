@@ -36,7 +36,7 @@ const RadialCircle = ({ value, title, color }: { value: number; title: string; c
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ scale: 1.025, transition: { duration: 0.2 } }}
-      className="flex flex-col items-center justify-center p-4 glass-pane border border-white/5 rounded-2xl text-center shadow-lg select-all"
+      className="flex flex-col items-center justify-center p-4 glass-pane border border-glass rounded-2xl text-center shadow-lg select-all"
     >
       <div className="relative flex items-center justify-center h-20 w-20">
         <svg className="absolute transform -rotate-90 w-20 h-20" viewBox="0 0 64 64">
@@ -61,9 +61,9 @@ const RadialCircle = ({ value, title, color }: { value: number; title: string; c
             strokeLinecap="round"
           />
         </svg>
-        <span className="text-xs font-black font-mono text-[#EDF2FF] select-none">{Math.round(animatedVal)}%</span>
+        <span className="text-xs font-black font-mono text-brand-primary select-none">{Math.round(animatedVal)}%</span>
       </div>
-      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#9BAAD4]/60 mt-3 block">{title}</span>
+      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-muted/60 mt-3 block">{title}</span>
     </motion.div>
   );
 };
@@ -263,12 +263,12 @@ runPromptInference().catch(console.error);`;
 
   if (!prompt) {
     return (
-      <div className="flex flex-col items-center justify-center glass-pane border border-white/5 p-12 text-center rounded-3xl h-full min-h-0">
+      <div className="flex flex-col items-center justify-center glass-pane border border-glass p-12 text-center rounded-3xl h-full min-h-0">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 mb-6 animate-pulse border border-emerald-500/20">
           <Eye className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-syne font-black tracking-tight text-[#EDF2FF] uppercase">No Prompt Compiled</h3>
-        <p className="max-w-md text-xs text-[#9BAAD4]/70 tracking-wide mt-3 uppercase font-semibold text-center select-none">
+        <h3 className="text-lg font-syne font-black tracking-tight text-brand-primary uppercase">No Prompt Compiled</h3>
+        <p className="max-w-md text-xs text-brand-muted/70 tracking-wide mt-3 uppercase font-semibold text-center select-none">
           Submit your prompt goal or raw instructions in the chat workspace to compile your first scored template structure.
         </p>
       </div>
@@ -300,14 +300,14 @@ runPromptInference().catch(console.error);`;
   return (
     <div className="space-y-6 h-full overflow-y-auto pr-1 custom-scrollbar flex flex-col min-h-0 pb-4">
       {/* Version select dropdown & Active metadata bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center glass-pane border border-white/5 px-5 py-3.5 rounded-2xl gap-3 text-white">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center glass-pane border border-glass px-5 py-3.5 rounded-2xl gap-3 text-white">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <History className="h-4 w-4" />
           </div>
           <div>
-            <span className="text-[9px] font-mono uppercase text-[#9BAAD4]/50 tracking-widest block">Active Prompt State</span>
-            <span className="text-xs font-extrabold uppercase text-[#EDF2FF] tracking-wider flex items-center gap-1.5">
+            <span className="text-[9px] font-mono uppercase text-brand-muted/50 tracking-widest block">Active Prompt State</span>
+            <span className="text-xs font-extrabold uppercase text-brand-primary tracking-wider flex items-center gap-1.5">
               Version v{prompt.version} Active <span className="h-1.5 w-1.5 rounded-full bg-emerald-555 animate-pulse"></span>
             </span>
           </div>
@@ -317,15 +317,15 @@ runPromptInference().catch(console.error);`;
           <div className="relative">
             <button
               onClick={() => setIsVersionDropdownOpen(!isVersionDropdownOpen)}
-              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider font-extrabold text-[#EDF2FF] bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider font-extrabold text-brand-primary bg-white/5 hover:bg-white/10 border border-glass px-4 py-2.5 rounded-xl transition-all cursor-pointer"
             >
               <span>Previous Versions ({versionHistory.length})</span>
               <ChevronDown className="h-3.5 w-3.5 text-white/50" />
             </button>
 
             {isVersionDropdownOpen && (
-              <div className="absolute right-0 mt-2 z-30 w-64 rounded-xl glass-pane-dark border border-white/5 p-2 shadow-2xl animate-zoom-in">
-                <div className="px-2.5 py-1.5 border-b border-white/5 text-[8px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest block mb-1 font-bold">
+              <div className="absolute right-0 mt-2 z-30 w-64 rounded-xl glass-pane-dark border border-glass p-2 shadow-2xl animate-zoom-in">
+                <div className="px-2.5 py-1.5 border-b border-glass text-[8px] font-mono text-brand-muted/40 uppercase tracking-widest block mb-1 font-bold">
                   Toggle Version Branches
                 </div>
                 <div className="max-h-56 overflow-y-auto space-y-0.5">
@@ -366,27 +366,27 @@ runPromptInference().catch(console.error);`;
       {/* Token Counting & SDK Integration Center Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
         {/* Dynamic Real-Time Tokens Hub */}
-        <div className="glass-pane border border-white/5 rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
+        <div className="glass-pane border border-glass rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -z-10"></div>
           
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#9BAAD4]/60">Real-Time Tokens Monitor</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-muted/60">Real-Time Tokens Monitor</span>
               <span className="text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
                 1 TOK ≈ 4 CHARS
               </span>
             </div>
             
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black font-mono text-[#EDF2FF] tracking-tight animate-pulse select-none">
+              <span className="text-3xl font-black font-mono text-brand-primary tracking-tight animate-pulse select-none">
                 {totalEstimatedTokens.toLocaleString()}
               </span>
-              <span className="text-xs font-mono font-bold text-[#9BAAD4]/40 uppercase">est. tokens</span>
+              <span className="text-xs font-mono font-bold text-brand-muted/40 uppercase">est. tokens</span>
             </div>
 
             {/* Structured Token progress gauge bar */}
             <div className="space-y-2 pt-1">
-              <div className="flex h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+              <div className="flex h-2 w-full bg-white/5 rounded-full overflow-hidden border border-glass shadow-inner">
                 <div 
                   className="bg-emerald-500 transition-all duration-500" 
                   style={{ width: `${Math.max(5, (sysTokens / Math.max(1, totalEstimatedTokens)) * 100)}%` }}
@@ -405,7 +405,7 @@ runPromptInference().catch(console.error);`;
               </div>
 
               {/* Dynamic Legend parameters */}
-              <div className="grid grid-cols-3 gap-1 text-[8px] font-mono uppercase text-[#9BAAD4]/50 pt-1 select-none">
+              <div className="grid grid-cols-3 gap-1 text-[8px] font-mono uppercase text-brand-muted/50 pt-1 select-none">
                 <div className="flex items-center gap-1 leading-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                   <span className="truncate">Sys: <strong className="text-white font-heavy">{sysTokens}</strong></span>
@@ -422,18 +422,18 @@ runPromptInference().catch(console.error);`;
             </div>
           </div>
 
-          <div className="mt-4 border-t border-white/5 pt-3.5 flex justify-between items-center text-[10px] font-mono text-[#9BAAD4]/40 tracking-wider">
+          <div className="mt-4 border-t border-glass pt-3.5 flex justify-between items-center text-[10px] font-mono text-brand-muted/40 tracking-wider">
             <span>MODEL CALL SLIP COST (FLASH)</span>
             <span className="text-emerald-400 font-extrabold select-none">${((totalEstimatedTokens / 1_000_000) * 0.075).toFixed(6)}</span>
           </div>
         </div>
 
         {/* Dynamic SDK Generator Bridge */}
-        <div className="glass-pane border border-white/5 rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
+        <div className="glass-pane border border-glass rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="space-y-3 select-none">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#9BAAD4]/60 block">Developer API Bridge</span>
-            <h4 className="text-sm font-extrabold uppercase text-[#EDF2FF] tracking-wider font-syne">Google Generative AI SDK</h4>
-            <p className="text-[10px] text-[#9BAAD4]/50 leading-relaxed font-semibold uppercase tracking-tight">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-muted/60 block">Developer API Bridge</span>
+            <h4 className="text-sm font-extrabold uppercase text-brand-primary tracking-wider font-syne">Google Generative AI SDK</h4>
+            <p className="text-[10px] text-brand-muted/50 leading-relaxed font-semibold uppercase tracking-tight">
               Compile the current scored prompt system instructions, dynamic parameters, and XML few-shot examples into certified deployment code.
             </p>
           </div>
@@ -449,15 +449,15 @@ runPromptInference().catch(console.error);`;
       </div>
 
       {/* Interactive SVG Diagram flow represent */}
-      <div className="rounded-3xl border border-white/5 glass-pane p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3 select-none">
-          <span className="text-[10px] font-mono font-bold text-[#9BAAD4]/60 uppercase tracking-[0.25em] flex items-center gap-1.5">
+      <div className="rounded-3xl border border-glass glass-pane p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4 border-b border-glass pb-3 select-none">
+          <span className="text-[10px] font-mono font-bold text-brand-muted/60 uppercase tracking-[0.25em] flex items-center gap-1.5">
             <ListCollapse className="h-4 w-4 text-emerald-500" /> Interactive SVG Compile Blueprint
           </span>
           <span className="text-[9px] font-mono text-emerald-400 tracking-wider uppercase font-bold">Core Flow Sandbox</span>
         </div>
 
-        <div className="flex justify-center bg-[#040910]/45 rounded-2xl p-4 overflow-x-auto border border-white/5">
+        <div className="flex justify-center bg-brand-deep/45 rounded-2xl p-4 overflow-x-auto border border-glass">
           <svg width="680" height="150" viewBox="0 0 680 150" className="max-w-full">
             {/* Background Glows */}
             <defs>
@@ -587,7 +587,7 @@ runPromptInference().catch(console.error);`;
         </div>
 
         {/* Diagram explanation block */}
-        <div className="mt-4 rounded-2xl bg-[#040910]/45 p-4 text-xs border border-white/5 text-[#EDF2FF]/90 select-text">
+        <div className="mt-4 rounded-2xl bg-brand-deep/45 p-4 text-xs border border-glass text-brand-primary/90 select-text">
           {selectedDiagramNode === "sys" && (
             <p>
               <strong className="text-emerald-450 font-sans font-bold uppercase text-[10px] tracking-wider block mb-1">System Rule-Rails:</strong>
@@ -622,8 +622,8 @@ runPromptInference().catch(console.error);`;
       </div>
 
       {/* Primary tab display containing current prompt details */}
-      <div className="rounded-3xl border border-white/5 glass-pane p-5 shadow-sm space-y-4 select-none">
-        <div className="flex border-b border-white/5 font-sans">
+      <div className="rounded-3xl border border-glass glass-pane p-5 shadow-sm space-y-4 select-none">
+        <div className="flex border-b border-glass font-sans">
           {[
             { id: "system", label: "System Instruction" },
             { id: "template", label: "User Template" },
@@ -635,8 +635,8 @@ runPromptInference().catch(console.error);`;
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex-1 pb-3 text-xs uppercase font-extrabold tracking-wider text-center transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? "border-b-2 border-emerald-500 text-[#EDF2FF]"
-                  : "text-[#9BAAD4]/60 hover:text-[#EDF2FF]"
+                  ? "border-b-2 border-emerald-500 text-brand-primary"
+                  : "text-brand-muted/60 hover:text-brand-primary"
               }`}
             >
               {tab.label}
@@ -649,7 +649,7 @@ runPromptInference().catch(console.error);`;
           {activeTab === "system" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[#9BAAD4]/50 uppercase tracking-widest">Compiled System Instruction Block</span>
+                <span className="text-[10px] font-mono text-brand-muted/50 uppercase tracking-widest">Compiled System Instruction Block</span>
                 <button
                   onClick={() => handleCopyText(prompt.systemInstruction, "sys")}
                   className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider font-extrabold text-black bg-emerald-500 hover:bg-emerald-450 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer tactile-glow"
@@ -667,7 +667,7 @@ runPromptInference().catch(console.error);`;
                   )}
                 </button>
               </div>
-              <pre className="p-5 rounded-2xl bg-[#040910]/75 text-emerald-400 text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto border border-white/5 select-all font-semibold shadow-inner">
+              <pre className="p-5 rounded-2xl bg-brand-deep/75 text-emerald-400 text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto border border-glass select-all font-semibold shadow-inner">
                 {prompt.systemInstruction}
               </pre>
             </div>
@@ -676,7 +676,7 @@ runPromptInference().catch(console.error);`;
           {activeTab === "template" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-[#9BAAD4]/50 uppercase tracking-widest">Context Template Structure</span>
+                <span className="text-[10px] font-mono text-brand-muted/50 uppercase tracking-widest">Context Template Structure</span>
                 <button
                   onClick={() => handleCopyText(prompt.userTemplate, "user")}
                   className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider font-extrabold text-black bg-emerald-500 hover:bg-emerald-450 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer tactile-glow"
@@ -694,7 +694,7 @@ runPromptInference().catch(console.error);`;
                   )}
                 </button>
               </div>
-              <pre className="p-5 rounded-2xl bg-[#040910]/75 text-slate-200 text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto border border-white/5 select-all font-semibold shadow-inner">
+              <pre className="p-5 rounded-2xl bg-brand-deep/75 text-slate-200 text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto border border-glass select-all font-semibold shadow-inner">
                 {prompt.userTemplate}
               </pre>
             </div>
@@ -716,7 +716,7 @@ runPromptInference().catch(console.error);`;
                 <p className="text-xs text-white/40 italic">No examples generated yet.</p>
               ) : (
                 prompt.examples.map((ex, index) => (
-                  <div key={ex.id || index} className="rounded-2xl border border-white/8 bg-[#040910]/60 overflow-hidden">
+                  <div key={ex.id || index} className="rounded-2xl border border-white/8 bg-brand-deep/60 overflow-hidden">
                     <div className="bg-white/5 px-4 py-3 text-[10px] font-mono font-bold text-white/50 border-b border-white/8 uppercase tracking-widest flex justify-between items-center select-none">
                       <span>Example Pair #{index + 1}</span>
                       
@@ -724,7 +724,7 @@ runPromptInference().catch(console.error);`;
                         {/* Quick Test populate button */}
                         <button
                           onClick={() => populateFromExample(ex)}
-                          className="text-[#6CECC8] hover:text-[#6CECC8]/80 hover:bg-[#6CECC8]/10 border border-[#6CECC8]/20 rounded-lg px-3 py-1.5 transition-all flex items-center gap-1.5 font-mono uppercase tracking-wider cursor-pointer"
+                          className="text-accent-mint hover:text-accent-mint/80 hover:bg-accent-mint/10 border border-accent-mint/20 rounded-lg px-3 py-1.5 transition-all flex items-center gap-1.5 font-mono uppercase tracking-wider cursor-pointer"
                           title="Populate compiler values dynamically"
                         >
                           <Play className="h-3 w-3 fill-current text-current" />
@@ -733,7 +733,7 @@ runPromptInference().catch(console.error);`;
 
                         <button
                           onClick={() => handleCopyText(`<user_query>\n${ex.input}\n</user_query>\n<ideal_response>\n${ex.output}\n</ideal_response>`, `ex-${index}`)}
-                          className="hover:text-white text-[#9BAAD4] transition-all font-mono uppercase tracking-wider px-3 py-1.5 border border-white/8 rounded-lg bg-white/5 cursor-pointer text-[9px]"
+                          className="hover:text-white text-brand-muted transition-all font-mono uppercase tracking-wider px-3 py-1.5 border border-white/8 rounded-lg bg-white/5 cursor-pointer text-[9px]"
                         >
                           {copiedSection === `ex-${index}` ? "Copied Example!" : "Copy XML Couple"}
                         </button>
@@ -744,9 +744,9 @@ runPromptInference().catch(console.error);`;
                         <span className="text-[9px] text-[#68789F] font-bold uppercase block mb-2">Input Sample</span>
                         <div className="text-white/80 whitespace-pre-wrap leading-relaxed font-semibold">{ex.input}</div>
                       </div>
-                      <div className="p-4 bg-[#6CECC8]/5">
-                        <span className="text-[9px] text-[#6CECC8] font-bold uppercase block mb-2">Target Response</span>
-                        <div className="text-[#6CECC8]/90 whitespace-pre-wrap leading-relaxed font-semibold">{ex.output}</div>
+                      <div className="p-4 bg-accent-mint/5">
+                        <span className="text-[9px] text-accent-mint font-bold uppercase block mb-2">Target Response</span>
+                        <div className="text-accent-mint/90 whitespace-pre-wrap leading-relaxed font-semibold">{ex.output}</div>
                       </div>
                     </div>
                   </div>
@@ -759,16 +759,16 @@ runPromptInference().catch(console.error);`;
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-text">
               {/* Radial Metrics animating columns */}
               <div className="grid grid-cols-2 gap-4">
-                <RadialCircle value={prompt.scores.clarity} title="Clarity Score" color="#6CECC8" />
-                <RadialCircle value={prompt.scores.constraintAdherence} title="Limits Guard" color="#79AEFF" />
-                <RadialCircle value={prompt.scores.edgeCases} title="Edge Conditions" color="#FFBA6A" />
-                <RadialCircle value={prompt.scores.tokenEfficiency} title="Token Margins" color="#B48FFF" />
+                <RadialCircle value={prompt.scores.clarity} title="Clarity Score" color="var(--accent-primary)" />
+                <RadialCircle value={prompt.scores.constraintAdherence} title="Limits Guard" color="var(--accent-secondary)" />
+                <RadialCircle value={prompt.scores.edgeCases} title="Edge Conditions" color="var(--accent-amber)" />
+                <RadialCircle value={prompt.scores.tokenEfficiency} title="Token Margins" color="var(--accent-violet)" />
               </div>
 
               {/* Feedback Texts */}
               <div className="space-y-4 p-5 rounded-2xl bg-white/5 border border-white/8 text-xs">
-                <span className="text-[10px] font-mono text-[#9BAAD4] uppercase tracking-widest block">Qualitative Assessment</span>
-                <div className="space-y-3.5 border-l-2 border-[#6CECC8] pl-4">
+                <span className="text-[10px] font-mono text-brand-muted uppercase tracking-widest block">Qualitative Assessment</span>
+                <div className="space-y-3.5 border-l-2 border-accent-mint pl-4">
                   <p className="text-white font-bold uppercase tracking-wider font-sans">Diagnosis Breakdown:</p>
                   <ul className="list-disc list-inside space-y-2 text-white/70 leading-relaxed font-medium uppercase text-[10px] tracking-tight">
                     <li><strong className="text-white uppercase mr-1">Clarity:</strong> {prompt.scoringFeedback.clarity}</li>
@@ -785,31 +785,31 @@ runPromptInference().catch(console.error);`;
 
       {/* Real-time Dynamic Prompt Hydrator Block */}
       {prompt.variables.length > 0 && (
-        <div className="rounded-3xl border border-white/5 glass-pane p-5 shadow-sm space-y-4">
+        <div className="rounded-3xl border border-glass glass-pane p-5 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
-            <Variable className="h-5 w-5 text-[#6CECC8]" />
+            <Variable className="h-5 w-5 text-accent-mint" />
             <div>
-              <h4 className="text-sm font-bold text-[#EDF2FF] uppercase tracking-wider font-syne">Live Compiler Hydrator</h4>
-              <p className="text-[10px] font-mono text-[#9BAAD4]/50 uppercase tracking-widest font-semibold">Inject variables and test compiler structures instantly</p>
+              <h4 className="text-sm font-bold text-brand-primary uppercase tracking-wider font-syne">Live Compiler Hydrator</h4>
+              <p className="text-[10px] font-mono text-brand-muted/50 uppercase tracking-widest font-semibold">Inject variables and test compiler structures instantly</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Variables input console */}
-            <div className="space-y-4 bg-[#040910]/45 p-5 rounded-2xl border border-white/5 select-none">
-              <span className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase block tracking-wider">Variable Entries</span>
+            <div className="space-y-4 bg-brand-deep/45 p-5 rounded-2xl border border-glass select-none">
+              <span className="text-[10px] font-mono text-brand-muted/40 uppercase block tracking-wider">Variable Entries</span>
               {prompt.variables.map((v) => (
                 <div key={v} className="space-y-1.5">
-                  <label className="text-xs font-extrabold uppercase tracking-widest text-[#EDF2FF]/85 flex items-center justify-between">
+                  <label className="text-xs font-extrabold uppercase tracking-widest text-brand-primary/85 flex items-center justify-between">
                     <span>{v}</span>
-                    <span className="text-[8px] font-mono text-[#9BAAD4]/40">{`{{${v}}}`}</span>
+                    <span className="text-[8px] font-mono text-brand-muted/40">{`{{${v}}}`}</span>
                   </label>
                   <input
                     type="text"
                     onChange={(e) => handleVariableChange(v, e.target.value)}
                     value={variableInputs[v] || ""}
                     placeholder={`Insert custom ${v}...`}
-                    className="w-full text-xs rounded-xl glass-pane-input px-4 py-2.5 focus:border-[#6CECC8] focus:outline-none text-[#EDF2FF] uppercase tracking-wider font-bold transition-all"
+                    className="w-full text-xs rounded-xl glass-pane-input px-4 py-2.5 focus:border-accent-mint focus:outline-none text-brand-primary uppercase tracking-wider font-bold transition-all"
                   />
                 </div>
               ))}
@@ -817,14 +817,14 @@ runPromptInference().catch(console.error);`;
 
             {/* Compiled template output console preview */}
             <div className="flex flex-col space-y-3">
-              <span className="text-[10px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest block">Hydrated Context Draft Output</span>
-              <div className="flex-1 p-5 rounded-2xl bg-[#040910]/75 font-mono text-[#6CECC8] text-xs whitespace-pre-wrap max-h-56 overflow-y-auto border border-white/5 select-all font-semibold shadow-inner">
+              <span className="text-[10px] font-mono text-brand-muted/40 uppercase tracking-widest block">Hydrated Context Draft Output</span>
+              <div className="flex-1 p-5 rounded-2xl bg-brand-deep/75 font-mono text-accent-mint text-xs whitespace-pre-wrap max-h-56 overflow-y-auto border border-glass select-all font-semibold shadow-inner">
                 {hydratedPreview || prompt.userTemplate}
               </div>
               <button
                 onClick={executeLiveHydrationRun}
                 disabled={isRunningTest}
-                className="w-full bg-[#6CECC8] text-black hover:bg-[#6CECC8]/80 transition-all font-extrabold text-xs uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed select-none border border-[#6CECC8]/15 cursor-pointer tactile-glow"
+                className="w-full bg-accent-mint text-black hover:bg-accent-mint/80 transition-all font-extrabold text-xs uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed select-none border border-accent-mint/15 cursor-pointer tactile-glow"
               >
                 <Play className="h-4 w-4 fill-current text-black" />
                 <span>{isRunningTest ? "Running Simulation..." : "Run Simulated Inference"}</span>
@@ -837,21 +837,21 @@ runPromptInference().catch(console.error);`;
       {/* Google Gen AI Node.js SDK Export Modal Dialog */}
       {isExportModalOpen && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto select-none animate-fade-in">
-          <div className="relative bg-[#07101F] border border-white/8 rounded-3xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-zoom-in font-sans">
+          <div className="relative bg-brand-secondary border border-white/8 rounded-3xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-zoom-in font-sans">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/8 px-6 py-4.5 bg-[#040910]">
+            <div className="flex items-center justify-between border-b border-white/8 px-6 py-4.5 bg-brand-deep">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#6CECC8]/15 border border-[#6CECC8]/25 text-[#6CECC8]">
+                <div className="p-2 rounded-xl bg-accent-mint/15 border border-accent-mint/25 text-accent-mint">
                   <Terminal className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">Deployable SDK Client Bundle</h3>
-                  <p className="text-[9px] font-mono uppercase tracking-widest text-[#6CECC8] mt-0.5">@google/genai TypeScript Boilerplate</p>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-accent-mint mt-0.5">@google/genai TypeScript Boilerplate</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsExportModalOpen(false)}
-                className="p-1.5 rounded-lg border border-white/10 hover:border-white/20 select-none text-white/50 hover:text-white transition-all cursor-pointer bg-white/5 text-xs font-mono"
+                className="p-1.5 rounded-lg border border-glass hover:border-white/20 select-none text-white/50 hover:text-white transition-all cursor-pointer bg-white/5 text-xs font-mono"
               >
                 ✕
               </button>
@@ -859,17 +859,17 @@ runPromptInference().catch(console.error);`;
 
             {/* Modal Body: Code Display Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <p className="text-[11px] text-[#9BAAD4] leading-relaxed uppercase tracking-tight font-medium">
+              <p className="text-[11px] text-brand-muted leading-relaxed uppercase tracking-tight font-medium">
                 Copy this fully resolved Node.js snippet. It initializes the official Google Gen AI SDK client, loads variable bindings, structures few-shot preconditioning blocks, and queries the optimized prompt.
               </p>
 
               <div className="relative rounded-2xl border border-white/8 bg-black overflow-hidden flex flex-col">
                 {/* Editor Titlebar */}
-                <div className="flex items-center justify-between px-5 py-3 bg-[#040910]/65 border-b border-white/8 text-[9px] font-mono select-none">
+                <div className="flex items-center justify-between px-5 py-3 bg-brand-deep/65 border-b border-white/8 text-[9px] font-mono select-none">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500/40"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/40"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#6CECC8]/40"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-accent-mint/40"></span>
                     <span className="text-white/40 ml-2">prompt_inference_runner.ts</span>
                   </div>
                   
@@ -879,7 +879,7 @@ runPromptInference().catch(console.error);`;
                       setApiCopied(true);
                       setTimeout(() => setApiCopied(false), 2000);
                     }}
-                    className="flex items-center gap-1.5 text-[#6CECC8] hover:text-[#6CECC8]/80 font-bold uppercase cursor-pointer text-[10px]"
+                    className="flex items-center gap-1.5 text-accent-mint hover:text-accent-mint/80 font-bold uppercase cursor-pointer text-[10px]"
                   >
                     {apiCopied ? (
                       <>
@@ -903,10 +903,10 @@ runPromptInference().catch(console.error);`;
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-white/8 px-6 py-4 bg-[#040910] flex justify-end">
+            <div className="border-t border-white/8 px-6 py-4 bg-brand-deep flex justify-end">
               <button
                 onClick={() => setIsExportModalOpen(false)}
-                className="bg-[#6CECC8] text-black hover:bg-[#6CECC8]/80 font-black font-mono text-[10px] uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer"
+                className="bg-accent-mint text-black hover:bg-accent-mint/80 font-black font-mono text-[10px] uppercase tracking-widest px-6 py-3 rounded-xl transition-all cursor-pointer"
               >
                 Close Deployment Bridge
               </button>

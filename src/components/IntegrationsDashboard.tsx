@@ -174,8 +174,8 @@ export default function IntegrationsDashboard({
     <div className="space-y-6 font-sans text-white">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Google Drive Connector Panel */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3.5 select-none">
+        <div className="rounded-3xl border border-glass bg-white/5 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-glass pb-3.5 select-none">
             <div className="flex items-center gap-2.5">
               <Cloud className="h-5 w-5 text-emerald-400 animate-pulse" />
               <div>
@@ -229,15 +229,15 @@ export default function IntegrationsDashboard({
               )}
             </div>
           ) : (
-            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
+            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-glass select-none">
               Connection to Google Drive not active. Click &quot;Connect&quot; above to access workspace files.
             </div>
           )}
         </div>
 
         {/* NotebookLM Connector panel */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3.5 select-none">
+        <div className="rounded-3xl border border-glass bg-white/5 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-glass pb-3.5 select-none">
             <div className="flex items-center gap-2.5">
               <FolderKanban className="h-5 w-5 text-emerald-400 animate-pulse" />
               <div>
@@ -288,7 +288,7 @@ export default function IntegrationsDashboard({
               )}
             </div>
           ) : (
-            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
+            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-glass select-none">
               Connection to NotebookLM not active. Click &quot;Connect&quot; above to sync research.
             </div>
           )}
@@ -297,8 +297,8 @@ export default function IntegrationsDashboard({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {/* GitHub version control sync workspace */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3.5 select-none">
+        <div className="rounded-3xl border border-glass bg-white/5 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-glass pb-3.5 select-none">
             <div className="flex items-center gap-2.5">
               <Github className="h-5 w-5 text-white" />
               <div>
@@ -321,12 +321,12 @@ export default function IntegrationsDashboard({
           {githubConnected && activePrompt ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-[10px] font-mono select-none">
-                <div className="bg-white/5 p-2 rounded-xl border border-white/10 flex items-center gap-2.5 text-white/70">
+                <div className="bg-white/5 p-2 rounded-xl border border-glass flex items-center gap-2.5 text-white/70">
                   <GitBranch className="h-4 w-4 text-white/30" />
                   <span>Branch: <strong className="text-white font-mono">{getGitBranchDisplay()}</strong></span>
                 </div>
                 <div 
-                  className="bg-white/5 p-2 rounded-xl border border-white/10 flex items-center gap-2.5 text-white/70 relative cursor-help select-none"
+                  className="bg-white/5 p-2 rounded-xl border border-glass flex items-center gap-2.5 text-white/70 relative cursor-help select-none"
                   onMouseEnter={() => setShowRepoTooltip(true)}
                   onMouseLeave={() => setShowRepoTooltip(false)}
                 >
@@ -334,10 +334,10 @@ export default function IntegrationsDashboard({
                   <span>Repo: <strong className={`font-mono ${githubMode === "SANDBOX" ? "text-cyan-300" : "text-white"}`}>{getRepoNameDisplay()}</strong></span>
 
                   {showRepoTooltip && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-64 bg-[#07101F]/95 border border-[#6CECC8]/15 rounded-xl shadow-2xl backdrop-blur-md text-[10px] uppercase text-[#9BAAD4] overflow-hidden transition-all duration-200 animate-fade-in">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-64 bg-brand-secondary/95 border border-accent-mint/15 rounded-xl shadow-2xl backdrop-blur-md text-[10px] uppercase text-brand-muted overflow-hidden transition-all duration-200 animate-fade-in">
                       <div className="p-2.5 space-y-1">
-                        <div className="flex items-center gap-1.5 text-[#6CECC8] font-black border-b border-white/5 pb-1.5 tracking-wide">
-                          <GitCommit className="h-3.5 w-3.5 text-[#6CECC8]" />
+                        <div className="flex items-center gap-1.5 text-accent-mint font-black border-b border-glass pb-1.5 tracking-wide">
+                          <GitCommit className="h-3.5 w-3.5 text-accent-mint" />
                           <span>Repository Context</span>
                         </div>
                         <div className="space-y-1 pt-1 text-[8px] font-mono leading-tight text-left">
@@ -350,7 +350,7 @@ export default function IntegrationsDashboard({
                             <span className="text-[#bfdbfe] font-bold flex items-center gap-1">
                               {getCommitHashShort() ? (
                                 <>
-                                  <span className="text-[#6CECC8]/80">{getCommitHashShort()}</span>
+                                  <span className="text-accent-mint/80">{getCommitHashShort()}</span>
                                   <span className="text-white/20 text-[7px]">({getCommitHashDisplay()})</span>
                                 </>
                               ) : (
@@ -394,8 +394,8 @@ export default function IntegrationsDashboard({
 
               {/* Version revision diff overview */}
               {integrations.github.lastCommitHash && integrations.github.lastCommitHash !== "No sync history yet" && (
-                <div className="border border-white/10 rounded-2xl overflow-hidden bg-black font-mono text-[10px] text-white/80">
-                  <div className="bg-white/5 px-4 py-2 border-b border-white/5 flex justify-between text-white/40 font-bold uppercase select-none">
+                <div className="border border-glass rounded-2xl overflow-hidden bg-black font-mono text-[10px] text-white/80">
+                  <div className="bg-white/5 px-4 py-2 border-b border-glass flex justify-between text-white/40 font-bold uppercase select-none">
                     <span>GIT DIFF WORKSPACE</span>
                     <span className={githubMode === "SANDBOX" ? "text-cyan-400" : "text-emerald-450"}>{integrations.github.lastCommitHash}</span>
                   </div>
@@ -419,15 +419,15 @@ export default function IntegrationsDashboard({
               Active prompt compiled state empty. Prepare templates before tracking revisions.
             </div>
           ) : (
-            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
+            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-glass select-none">
               Connection to GitHub not active. Click &quot;Connect&quot; above to commit revisions.
             </div>
           )}
         </div>
 
         {/* Hugging Face Templates lookup sharing */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3.5 select-none">
+        <div className="rounded-3xl border border-glass bg-white/5 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-glass pb-3.5 select-none">
             <div className="flex items-center gap-2.5">
               <Layers className="h-5 w-5 text-amber-500 animate-pulse" />
               <div>
@@ -457,7 +457,7 @@ export default function IntegrationsDashboard({
                     onClick={() => {
                       onHuggingFaceTemplatePicked(t);
                     }}
-                    className="p-3.5 rounded-xl border border-white/5 bg-white/5 hover:bg-emerald-500/5 group cursor-pointer flex justify-between items-center transition-all"
+                    className="p-3.5 rounded-xl border border-glass bg-white/5 hover:bg-emerald-500/5 group cursor-pointer flex justify-between items-center transition-all"
                   >
                     <div>
                       <p className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-400 transition-all">{t.name}</p>
@@ -469,7 +469,7 @@ export default function IntegrationsDashboard({
               </div>
             </div>
           ) : (
-            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
+            <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-glass select-none">
               Connection to Hugging Face template database not active. Click &quot;Connect&quot; to browse.
             </div>
           )}

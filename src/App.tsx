@@ -26,6 +26,7 @@ import AuthModal from "./components/AuthModal";
 import AssetsFolder from "./components/AssetsFolder";
 import Pipelines from "./components/Pipelines";
 import IntegrationsDashboard from "./components/IntegrationsDashboard";
+import { AppTheme, loadStoredTheme, persistTheme } from "./theme";
 
 export default function App() {
   const [sessions, setSessions] = useState<PromptSession[]>([]);
@@ -61,6 +62,7 @@ export default function App() {
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [uiScale, setUiScale] = useState<"compact" | "comfortable" | "spacious">("comfortable");
+  const [appTheme, setAppTheme] = useState<AppTheme>(() => loadStoredTheme());
   const [preferredModel, setPreferredModel] = useState<string>("gemini-2.0-flash");
   const [showLoader, setShowLoader] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -97,11 +99,20 @@ export default function App() {
   };
 
   useEffect(() => {
+    persistTheme(appTheme);
+  }, [appTheme]);
+
+  useEffect(() => {
     checkApiHealth();
     loadSessions();
     fetchGithubMetadata();
     fetchDiagnostics();
   }, []);
+
+  const handleChangeTheme = (theme: AppTheme) => {
+    setAppTheme(theme);
+    persistTheme(theme);
+  };
 
   const fetchGithubMetadata = async () => {
     try {
@@ -509,7 +520,8 @@ export default function App() {
 
   return (
     <div 
-      className={`flex h-screen w-screen overflow-hidden bg-[#040910] bg-cyber-grid font-sans antialiased text-[#EDF2FF] density-${uiScale}`}
+      data-theme={appTheme}
+      className={`flex h-screen w-screen overflow-hidden bg-brand-deep bg-cyber-grid font-sans antialiased text-brand-primary density-${uiScale}`}
       style={{ "--workspace-panel-height": panelHeight } as React.CSSProperties}
     >
       {/* Cinematic Loader Core Landing */}
@@ -565,7 +577,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 h-full w-full items-stretch animate-fade-in min-h-0">
               
               {/* Chat Thread Console column */}
-              <div className="col-span-1 lg:col-span-3 flex flex-col glass-pane border border-white/5 rounded-3xl p-5 relative overflow-hidden lg:h-[var(--workspace-panel-height)] h-full min-h-0">
+              <div className="col-span-1 lg:col-span-3 flex flex-col glass-pane border border-glass rounded-3xl p-5 relative overflow-hidden lg:h-[var(--workspace-panel-height)] h-full min-h-0">
                 {/* Conversations display body panel */}
                 <div className="flex-1 overflow-y-auto pr-1 space-y-4 min-h-0 custom-scrollbar">
                   {activeSess ? (
@@ -581,7 +593,7 @@ export default function App() {
                         >
                           <div
                             className={`flex h-8 w-8 items-center justify-center rounded-xl text-3xs font-black uppercase shrink-0 ${
-                              isUser ? "bg-emerald-500 text-black shadow" : "bg-[#040910]/85 text-[#9BAAD4] border border-white/5"
+                              isUser ? "bg-emerald-500 text-black shadow" : "bg-brand-deep/85 text-brand-muted border border-glass"
                             }`}
                           >
                             {isUser ? "U" : "P"}
@@ -592,12 +604,12 @@ export default function App() {
                               className={`rounded-2xl px-5 py-3.5 text-xs leading-relaxed shadow-sm ${
                                 isUser
                                   ? "bg-emerald-500 text-black rounded-tr-none font-bold shadow-md"
-                                  : "bg-[#040910]/45 border border-white/5 text-[#EDF2FF]/90 rounded-tl-none font-medium"
+                                  : "bg-brand-deep/45 border border-glass text-brand-primary/90 rounded-tl-none font-medium"
                               }`}
                             >
                               <p className="whitespace-pre-wrap font-sans">{hist.content}</p>
                             </div>
-                            <span className="text-[10px] font-mono text-[#9BAAD4]/40 tracking-wider block px-1 text-right uppercase">
+                            <span className="text-[10px] font-mono text-brand-muted/40 tracking-wider block px-1 text-right uppercase">
                               {new Date(hist.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
@@ -605,14 +617,14 @@ export default function App() {
                       );
                     })
                   ) : (
-                    <div className="text-center py-20 text-[#9BAAD4]/40 italic text-xs uppercase font-mono tracking-widest font-extrabold">
+                    <div className="text-center py-20 text-brand-muted/40 italic text-xs uppercase font-mono tracking-widest font-extrabold">
                       Select or instantiate an active workshop session.
                     </div>
                   )}
                 </div>
 
                 {/* Multimodal document or photo selection indicator bar */}
-                <div className="space-y-2 mt-3 pt-3 border-t border-white/5">
+                <div className="space-y-2 mt-3 pt-3 border-t border-glass">
                   <div className="flex flex-wrap gap-2">
                     {/* Document grounding linked badge */}
                     {groundingDocName && (
@@ -659,7 +671,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/10 shrink-0 cursor-pointer"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-glass shrink-0 cursor-pointer"
                       title="Attach .txt, .json or .md grounding files"
                     >
                       <FileText className="h-4 w-4" />
@@ -667,7 +679,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => imageInputRef.current?.click()}
-                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/10 shrink-0 cursor-pointer"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-glass shrink-0 cursor-pointer"
                       title="Attach multimodality image sources"
                     >
                       <Upload className="h-4 w-4" />
@@ -678,7 +690,7 @@ export default function App() {
                       value={promptIdeaInput}
                       onChange={(e) => setPromptIdeaInput(e.target.value)}
                       placeholder="Discuss revisions, or type a prompt goal..."
-                      className="flex-1 rounded-xl focus:outline-none px-4 text-xs text-[#EDF2FF] uppercase placeholder:text-[#9BAAD4]/30 tracking-wider font-extrabold transition-all glass-pane-input"
+                      className="flex-1 rounded-xl focus:outline-none px-4 text-xs text-brand-primary uppercase placeholder:text-brand-muted/30 tracking-wider font-extrabold transition-all glass-pane-input"
                     />
                     
                     {/* Voice Recording Prominent Control */}
@@ -689,7 +701,7 @@ export default function App() {
                         className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-350 relative border cursor-pointer shrink-0 ${
                           isRecording 
                             ? "bg-red-500/20 text-red-400 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse" 
-                            : "bg-[#040910]/40 text-[#6CECC8] border-[#6CECC8]/25 hover:bg-[#6CECC8]/15 hover:border-[#6CECC8]/50 hover:shadow-[0_0_12px_rgba(108,236,200,0.25)]"
+                            : "bg-brand-deep/40 text-accent-mint border-accent-mint/25 hover:bg-accent-mint/15 hover:border-accent-mint/50 hover:shadow-[0_0_12px_color-mix(in_srgb,var(--accent-primary)_25%,transparent)]"
                         }`}
                         title={isRecording ? "Listening... click to pause" : "Record Voice Prompt"}
                       >
@@ -705,11 +717,11 @@ export default function App() {
                       type="button"
                       onClick={executePromptOptimization}
                       disabled={isCompiling || !promptIdeaInput.trim()}
-                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-[#07101F]/40 border border-white/5 text-[#6CECC8] hover:bg-[#6CECC8]/10 hover:border-[#6CECC8]/35 transition-all disabled:opacity-40 shrink-0 cursor-pointer tactile-glow"
+                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-brand-secondary/40 border border-glass text-accent-mint hover:bg-accent-mint/10 hover:border-accent-mint/35 transition-all disabled:opacity-40 shrink-0 cursor-pointer tactile-glow"
                       title="Compile and optimize structured prompt instantly"
                     >
                       {isCompiling ? (
-                        <div className="h-4 w-4 border-2 border-[#6CECC8] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="h-4 w-4 border-2 border-accent-mint border-t-transparent rounded-full animate-spin"></div>
                       ) : (
                         <Sparkles className="h-4.5 w-4.5 text-emerald-400" />
                       )}
@@ -869,56 +881,56 @@ export default function App() {
         </main>
 
         {/* Sub-Footer Status */}
-        <footer className="mt-1 flex flex-col sm:flex-row justify-between items-center border-t border-white/5 py-2 select-none gap-2 shrink-0">
-          <div className="flex flex-wrap gap-4 items-center text-[9px] font-mono text-white/40 uppercase tracking-widest">
-            <button className="flex items-center gap-1 cursor-pointer hover:text-white/60 transition-colors" onClick={() => { fetchDiagnostics(); setShowDiagnostics(!showDiagnostics); }}>
-              <div className="w-1 h-1 bg-[#6CECC8] rounded-full shadow-[0_0_4px_#6cecc8]"></div>
-              <span>Server: <span className="text-white">ACTIVE</span></span>
+        <footer className="mt-1 flex flex-col sm:flex-row justify-between items-center border-t border-glass py-2 select-none gap-2 shrink-0">
+          <div className="flex flex-wrap gap-4 items-center text-[9px] font-mono text-brand-muted/70 uppercase tracking-widest">
+            <button className="flex items-center gap-1 cursor-pointer hover:text-brand-primary transition-colors" onClick={() => { fetchDiagnostics(); setShowDiagnostics(!showDiagnostics); }}>
+              <div className="w-1 h-1 bg-accent-mint rounded-full shadow-[0_0_4px_var(--accent-primary)]"></div>
+              <span>Server: <span className="text-brand-primary">ACTIVE</span></span>
             </button>
             <div className="flex items-center gap-1">
-              <div className="w-1 h-1 bg-[#79AEFF] rounded-full shadow-[0_0_4px_#79aeff]"></div>
-              <span>RAG: <span className="text-[#79AEFF]">READY</span></span>
+              <div className="w-1 h-1 bg-accent-blue rounded-full shadow-[0_0_4px_var(--accent-secondary)]"></div>
+              <span>RAG: <span className="text-accent-blue">READY</span></span>
             </div>
             <div className="flex items-center gap-1">
-              <div className={`w-1 h-1 rounded-full ${apiHealthy ? "bg-[#6CECC8] shadow-[0_0_4px_#6cecc8]" : "bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.5)]"}`}></div>
-              <span>Gemini: <span className={apiHealthy ? "text-[#6CECC8]" : "text-amber-400"}>{apiHealthy ? "ACTIVE" : "SANDBOX"}</span></span>
+              <div className={`w-1 h-1 rounded-full ${apiHealthy ? "bg-accent-mint shadow-[0_0_4px_var(--accent-primary)]" : "bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.5)]"}`}></div>
+              <span>Gemini: <span className={apiHealthy ? "text-accent-mint" : "text-amber-500"}>{apiHealthy ? "ACTIVE" : "SANDBOX"}</span></span>
             </div>
           </div>
-          <div className="text-[9px] uppercase font-mono text-white/35">
-            SESSION &rarr; <span className="text-[#6CECC8] font-bold tracking-wider">{activeSessionId ? activeSessionId.toUpperCase() : "NO SESSION"}</span>
+          <div className="text-[9px] uppercase font-mono text-brand-muted/60">
+            SESSION &rarr; <span className="text-accent-mint font-bold tracking-wider">{activeSessionId ? activeSessionId.toUpperCase() : "NO SESSION"}</span>
           </div>
         </footer>
       </div>
 
       {/* Runtime Diagnostics Panel */}
       {showDiagnostics && diagnosticsData && (
-        <div className="fixed bottom-16 right-4 z-40 w-80 bg-[#07101F]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden animate-fade-in font-mono text-[9px]">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-[#040910]/60">
-            <span className="text-[#6CECC8] font-black uppercase tracking-wider text-[10px]">Runtime Diagnostics</span>
-            <button onClick={() => setShowDiagnostics(false)} className="text-white/40 hover:text-white p-0.5 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
+        <div className="fixed bottom-16 right-4 z-40 w-80 glass-pane-dark border border-glass rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden animate-fade-in font-mono text-[9px]">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-glass bg-brand-deep/60">
+            <span className="text-accent-mint font-black uppercase tracking-wider text-[10px]">Runtime Diagnostics</span>
+            <button onClick={() => setShowDiagnostics(false)} className="text-brand-muted/60 hover:text-brand-primary p-0.5 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
           </div>
-          <div className="p-3 space-y-1.5 max-h-72 overflow-y-auto text-[#9BAAD4]">
-            <div className="flex justify-between"><span className="text-white/30">Server</span><span className={`font-bold ${diagnosticsData.server?.status === "ACTIVE" ? "text-[#6CECC8]" : "text-red-400"}`}>{diagnosticsData.server?.status}</span></div>
-            <div className="flex justify-between"><span className="text-white/30">Gemini API</span><span className={`font-bold ${diagnosticsData.geminiApi?.status === "ACTIVE" ? "text-[#6CECC8]" : "text-amber-400"}`}>{diagnosticsData.geminiApi?.status}</span></div>
-            <div className="flex justify-between"><span className="text-white/30">GitHub</span><span className={`font-bold ${diagnosticsData.github?.status === "CONNECTED" ? "text-[#6CECC8]" : "text-white/40"}`}>{diagnosticsData.github?.status}</span></div>
-            <div className="flex justify-between"><span className="text-white/30">Google OAuth</span><span className={`font-bold ${diagnosticsData.googleOAuth?.status === "CONFIGURED" ? "text-[#6CECC8]" : "text-white/40"}`}>{diagnosticsData.googleOAuth?.status}</span></div>
+          <div className="p-3 space-y-1.5 max-h-72 overflow-y-auto text-brand-muted">
+            <div className="flex justify-between"><span className="text-brand-muted-dark">Server</span><span className={`font-bold ${diagnosticsData.server?.status === "ACTIVE" ? "text-accent-mint" : "text-red-400"}`}>{diagnosticsData.server?.status}</span></div>
+            <div className="flex justify-between"><span className="text-brand-muted-dark">Gemini API</span><span className={`font-bold ${diagnosticsData.geminiApi?.status === "ACTIVE" ? "text-accent-mint" : "text-amber-500"}`}>{diagnosticsData.geminiApi?.status}</span></div>
+            <div className="flex justify-between"><span className="text-brand-muted-dark">GitHub</span><span className={`font-bold ${diagnosticsData.github?.status === "CONNECTED" ? "text-accent-mint" : "text-brand-muted/50"}`}>{diagnosticsData.github?.status}</span></div>
+            <div className="flex justify-between"><span className="text-brand-muted-dark">Google OAuth</span><span className={`font-bold ${diagnosticsData.googleOAuth?.status === "CONFIGURED" ? "text-accent-mint" : "text-brand-muted/50"}`}>{diagnosticsData.googleOAuth?.status}</span></div>
             {diagnosticsData.features && (
-              <div className="border-t border-white/5 pt-1.5 mt-1">
-                <span className="text-white/30 block mb-1">Features:</span>
+              <div className="border-t border-glass pt-1.5 mt-1">
+                <span className="text-brand-muted-dark block mb-1">Features:</span>
                 {Object.entries(diagnosticsData.features).map(([key, val]) => (
                   <div key={key} className="flex justify-between pl-2">
-                    <span className="text-white/25 truncate">{key}</span>
-                    <span className={`font-bold ${val === "ACTIVE" ? "text-[#6CECC8]" : val === "SANDBOX" ? "text-amber-400" : "text-white/40"}`}>{val as string}</span>
+                    <span className="text-brand-muted/60 truncate">{key}</span>
+                    <span className={`font-bold ${val === "ACTIVE" ? "text-accent-mint" : val === "SANDBOX" ? "text-amber-500" : "text-brand-muted/50"}`}>{val as string}</span>
                   </div>
                 ))}
               </div>
             )}
-            <div className="flex justify-between"><span className="text-white/30">Sessions</span><span className="text-white font-bold">{diagnosticsData.storage?.sessionCount}</span></div>
+            <div className="flex justify-between"><span className="text-brand-muted-dark">Sessions</span><span className="text-brand-primary font-bold">{diagnosticsData.storage?.sessionCount}</span></div>
             {diagnosticsData.missingCredentials && diagnosticsData.missingCredentials.length > 0 && (
-              <div className="border-t border-white/5 pt-1.5 mt-1">
-                <span className="text-amber-400/70 block mb-1">Missing Credentials:</span>
+              <div className="border-t border-glass pt-1.5 mt-1">
+                <span className="text-amber-500/80 block mb-1">Missing Credentials:</span>
                 {diagnosticsData.missingCredentials.map((c: string) => (
-                  <div key={c} className="text-amber-400/50 pl-2">- {c}</div>
+                  <div key={c} className="text-amber-500/60 pl-2">- {c}</div>
                 ))}
               </div>
             )}
@@ -938,6 +950,8 @@ export default function App() {
           onHuggingFaceTemplatePicked={handleHuggingFaceTemplateSelection}
           uiScale={uiScale}
           onChangeUiScale={setUiScale}
+          appTheme={appTheme}
+          onChangeTheme={handleChangeTheme}
           preferredModel={preferredModel}
           onChangePreferredModel={setPreferredModel}
         />

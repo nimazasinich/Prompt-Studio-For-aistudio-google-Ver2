@@ -79,32 +79,32 @@ export default function AssetsFolder({
     <div className="space-y-6 font-sans text-white h-full max-h-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar pr-1">
       {/* Overview stats header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5">
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center gap-4.5">
-          <div className="h-10 w-10 rounded-xl bg-[#6CECC8]/10 text-[#6CECC8] border border-[#6CECC8]/20 flex items-center justify-center">
+        <div className="rounded-2xl border border-glass bg-white/5 p-4 flex items-center gap-4.5">
+          <div className="h-10 w-10 rounded-xl bg-accent-mint/10 text-accent-mint border border-accent-mint/20 flex items-center justify-center">
             <HardDrive className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-mono text-[#9BAAD4]/65 uppercase tracking-widest leading-none mb-1">Knowledge Storage</p>
+            <p className="text-[10px] font-mono text-brand-muted/65 uppercase tracking-widest leading-none mb-1">Knowledge Storage</p>
             <h4 className="text-sm font-black uppercase tracking-wider text-white">81.0 KB Grounded</h4>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center gap-4.5">
+        <div className="rounded-2xl border border-glass bg-white/5 p-4 flex items-center gap-4.5">
           <div className="h-10 w-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
             <Database className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-mono text-[#9BAAD4]/65 uppercase tracking-widest leading-none mb-1">Retrieval Weight</p>
+            <p className="text-[10px] font-mono text-brand-muted/65 uppercase tracking-widest leading-none mb-1">Retrieval Weight</p>
             <h4 className="text-sm font-black uppercase tracking-wider text-white">Hybrid Vector / RAG</h4>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center gap-4.5">
+        <div className="rounded-2xl border border-glass bg-white/5 p-4 flex items-center gap-4.5">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
             <ShieldCheck className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <p className="text-[10px] font-mono text-[#9BAAD4]/65 uppercase tracking-widest leading-none mb-1">Security Guardrails</p>
+            <p className="text-[10px] font-mono text-brand-muted/65 uppercase tracking-widest leading-none mb-1">Security Guardrails</p>
             <h4 className="text-sm font-black uppercase tracking-wider text-white">PII Redacted</h4>
           </div>
         </div>
@@ -114,10 +114,10 @@ export default function AssetsFolder({
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1 min-h-0">
         
         {/* Left column: Documents List */}
-        <div className="col-span-1 lg:col-span-3 rounded-3xl border border-white/10 bg-white/5 p-6 flex flex-col min-h-0">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4 select-none shrink-0">
+        <div className="col-span-1 lg:col-span-3 rounded-3xl border border-glass bg-white/5 p-6 flex flex-col min-h-0">
+          <div className="flex items-center justify-between border-b border-glass pb-4 mb-4 select-none shrink-0">
             <div className="flex items-center gap-2.5">
-              <FileText className="h-5 w-5 text-[#6CECC8]" />
+              <FileText className="h-5 w-5 text-accent-mint" />
               <div>
                 <h4 className="text-xs font-black uppercase tracking-wider">Grounding Document Registries</h4>
                 <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-0.5 leading-none">Pre-structured prompt contexts</p>
@@ -130,7 +130,7 @@ export default function AssetsFolder({
                 placeholder="Filter files..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full text-[10px] rounded-lg border border-white/10 py-1.5 pl-7 pr-3 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-[#6CECC8]/30 font-bold uppercase tracking-wide"
+                className="w-full text-[10px] rounded-lg border border-glass py-1.5 pl-7 pr-3 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-accent-mint/30 font-bold uppercase tracking-wide"
               />
               <Search className="absolute left-2.5 top-2.5 h-3 w-3 text-white/30" />
             </div>
@@ -144,15 +144,15 @@ export default function AssetsFolder({
                   key={idx}
                   className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
                     isCurrentlyActive 
-                      ? "border-[#6CECC8]/35 bg-[#6CECC8]/5" 
-                      : "border-white/5 bg-[#040910]/30 hover:border-white/15"
+                      ? "border-accent-mint/35 bg-accent-mint/5" 
+                      : "border-glass bg-brand-deep/30 hover:border-white/15"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
                       isCurrentlyActive 
-                        ? "bg-[#6CECC8]/15 border-[#6CECC8]/30 text-[#6CECC8]" 
-                        : "bg-white/5 border-white/10 text-white/50"
+                        ? "bg-accent-mint/15 border-accent-mint/30 text-accent-mint" 
+                        : "bg-white/5 border-glass text-white/50"
                     }`}>
                       <FileText className="h-4 w-4" />
                     </div>
@@ -161,7 +161,7 @@ export default function AssetsFolder({
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[9px] font-mono text-white/35 uppercase">{doc.size}</span>
                         <span className="text-[9px] font-mono text-white/20">&bull;</span>
-                        <span className="text-[9px] font-mono text-[#6CECC8] uppercase tracking-wider">{doc.source}</span>
+                        <span className="text-[9px] font-mono text-accent-mint uppercase tracking-wider">{doc.source}</span>
                       </div>
                     </div>
                   </div>
@@ -177,7 +177,7 @@ export default function AssetsFolder({
                     ) : (
                       <button
                         onClick={() => onSelectGrounding(doc.name, doc.content)}
-                        className="rounded-xl px-3 py-1.5 border border-[#6CECC8]/25 bg-[#6CECC8]/10 text-[#6CECC8] hover:bg-[#6CECC8]/20 text-[10px] font-mono font-black uppercase tracking-wider cursor-pointer flex items-center gap-1"
+                        className="rounded-xl px-3 py-1.5 border border-accent-mint/25 bg-accent-mint/10 text-accent-mint hover:bg-accent-mint/20 text-[10px] font-mono font-black uppercase tracking-wider cursor-pointer flex items-center gap-1"
                       >
                         Ground Active Workspace
                         <ArrowUpRight className="h-3 w-3" />
@@ -191,8 +191,8 @@ export default function AssetsFolder({
         </div>
 
         {/* Right column: Multimodal Vault */}
-        <div className="col-span-1 lg:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-6 flex flex-col min-h-0">
-          <div className="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-4 select-none shrink-0">
+        <div className="col-span-1 lg:col-span-2 rounded-3xl border border-glass bg-white/5 p-6 flex flex-col min-h-0">
+          <div className="flex items-center gap-2.5 border-b border-glass pb-4 mb-4 select-none shrink-0">
             <Image className="h-5 w-5 text-purple-400" />
             <div>
               <h4 className="text-xs font-black uppercase tracking-wider">Multimodal Image Vault</h4>
@@ -209,11 +209,11 @@ export default function AssetsFolder({
                   className={`p-4 rounded-xl border transition-all flex flex-col gap-3.5 ${
                     isCurrentlyActive 
                       ? "border-purple-500/35 bg-purple-500/5" 
-                      : "border-white/5 bg-[#040910]/30 hover:border-white/15"
+                      : "border-glass bg-brand-deep/30 hover:border-white/15"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-lg bg-[#040910] border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="h-11 w-11 rounded-lg bg-brand-deep border border-glass flex items-center justify-center shrink-0 overflow-hidden">
                       <img src={img.preview} alt="mock preview" className="h-9 w-9 object-contain" />
                     </div>
                     <div className="min-w-0 text-left flex-1">
@@ -222,7 +222,7 @@ export default function AssetsFolder({
                     </div>
                   </div>
 
-                  <div className="flex justify-end border-t border-white/5 pt-3">
+                  <div className="flex justify-end border-t border-glass pt-3">
                     {isCurrentlyActive ? (
                       <button
                         onClick={onClearImage}
