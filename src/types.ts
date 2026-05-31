@@ -33,6 +33,8 @@ export interface PromptDefinition {
     tokenEfficiency: string;
   };
   tags?: string[];
+  starred?: boolean; // user-favorited prompt
+  archived?: boolean; // soft-deleted / archived prompt
 }
 
 export type HistoryItemType = 'chat' | 'optimize' | 'feedback_analysis' | 'test_run';
