@@ -303,7 +303,7 @@ export default function SettingsModal({
                     <label className="text-[9px] font-mono font-bold tracking-wider text-[#EDF2FF]/60 uppercase">Workspace ID Prefix</label>
                     <input
                       type="text"
-                      defaultValue="PROMPT_ARCHITECT_GLOBAL"
+                      defaultValue="prompt_workspace_local"
                       className="w-full rounded-xl focus:outline-none px-3.5 py-2.5 bg-[#040910]/60 border border-white/5 text-[#EDF2FF] uppercase tracking-wide font-mono text-[10px]"
                     />
                   </div>
@@ -376,7 +376,7 @@ export default function SettingsModal({
                 <div className="p-3.5 rounded-2xl bg-[#040910]/40 border border-white/5 space-y-1.5">
                   <span className="text-[8.5px] font-mono font-bold text-[#B48FFF] uppercase block">Platform State Status</span>
                   <p className="text-[9.5px] leading-relaxed uppercase font-mono text-white/50">
-                    Active directory synchronized over Google DeepMind Cloud Run telemetry. Cache synched completely locally.
+                    Session state persists locally. Connect credentials in the Secrets panel for cloud synchronization.
                   </p>
                 </div>
               </div>
@@ -471,10 +471,10 @@ export default function SettingsModal({
                   {openAccordion === "latency" && (
                     <div className="p-4 border-t border-white/5 grid grid-cols-4 gap-2 text-center bg-[#040910]/60">
                       {[
-                        { label: "Compiler Latency", val: "1.4s" },
-                        { label: "QA Checks Pass", val: "94.2%" },
-                        { label: "Token Savings", val: "38.5%" },
-                        { label: "Runs Logged", val: "1,240" }
+                        { label: "Compiler Latency", val: "—" },
+                        { label: "QA Checks Pass", val: "—" },
+                        { label: "Token Savings", val: "—" },
+                        { label: "Runs Logged", val: "—" }
                       ].map((an) => (
                         <div key={an.label} className="p-2 border border-white/[0.03] bg-black/30 rounded-lg">
                           <span className="text-[7.5px] font-mono text-[#9BAAD4]/40 uppercase block truncate">{an.label}</span>
@@ -567,7 +567,7 @@ export default function SettingsModal({
                   {driveAuthStep === "connected" && (
                     <div className="space-y-3">
                       <div className="bg-emerald-500/5 border border-emerald-500/20 text-[#6CECC8] p-2.5 rounded-lg text-[9px] font-mono flex items-center justify-between">
-                        <span>Connected as: <strong className="text-white">deepmind_evals@gmail.com</strong></span>
+                        <span>Status: <strong className="text-white">Drive Linked (Sandbox)</strong></span>
                         <button 
                           onClick={() => {
                             const next = { ...integrations };
