@@ -242,7 +242,7 @@ async function runPromptInference() {
 
   // 3. Dispatch structured payload to Google Generative AI
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: "gemini-2.0-flash",
     contents: ${prompt.examples && prompt.examples.length > 0 ? `[
       ${prompt.examples.map(ex => `{ role: "user", parts: [{ text: ${JSON.stringify(ex.input)} }] },
       { role: "model", parts: [{ text: ${JSON.stringify(ex.output)} }] }`).join(",\n      ")},

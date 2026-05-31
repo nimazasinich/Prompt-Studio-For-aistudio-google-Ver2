@@ -6,13 +6,18 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import bcrypt from "bcrypt";
+import rateLimit from "express-rate-limit";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { KNOWLEDGE_BASE } from "./src/data/knowledgeBase";
 import { PromptSession, PromptHistoryItem, PromptDefinition, TestScenario } from "./src/types";
+import { compileWithDeterministicEngine, PromptManifest } from "./src/engine/promptEngine";
 
 dotenv.config();
+
+const BCRYPT_ROUNDS = 12;
 
 const app = express();
 const PORT = 3000;
@@ -184,6 +189,44 @@ function saveUsersToDisk() {
   storage.saveUsers(usersState);
 }
 
+// ----------------------------------------------------
+// ONE-TIME PASSWORD STORAGE MIGRATION
+// ----------------------------------------------------
+// Historically, accounts stored raw plain-text passwords. We cannot verify
+// those values to safely re-hash them, so we flag the affected accounts as
+// requiring a password reset and strip the plain-text secret from disk.
+function migratePlainTextPasswords() {
+  let mutated = false;
+  for (const [email, user] of Object.entries(usersState)) {
+    if (user && typeof user === "object" && user.password && !user.passwordHash) {
+      console.warn(
+        `[AuthMigration] Account "${email}" has a legacy plain-text password and no passwordHash. ` +
+        `Flagging for password reset; the plain-text secret will be removed from storage.`
+      );
+      user.requiresPasswordReset = true;
+      delete user.password;
+      mutated = true;
+    }
+  }
+  if (mutated) {
+    saveUsersToDisk();
+    console.warn("[AuthMigration] Legacy plain-text passwords scrubbed. Affected users must reset their password.");
+  }
+}
+
+migratePlainTextPasswords();
+
+// ----------------------------------------------------
+// RATE LIMITING (AUTH ENDPOINTS)
+// ----------------------------------------------------
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max 20 attempts per window per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many authentication attempts. Please try again in 15 minutes." },
+});
+
 // Prompt Templates Catalog
 const PROMPT_TEMPLATES = [
   {
@@ -285,6 +328,70 @@ const PROMPT_TEMPLATES = [
       tokenEfficiency: "Presents code blocks succinctly."
     },
     tags: ["safety-hardened", "experimental"]
+  },
+  {
+    id: "tmpl_customer_support",
+    name: "Elite Customer Support Agent",
+    category: "Customer Service",
+    model: "Gemini 2.0 Flash",
+    description: "Handles complex customer escalations with empathy, precision, and clear resolution pathways.",
+    systemInstruction: "You are an elite Tier-3 Customer Support Specialist. Respond with empathy, provide precise troubleshooting, and always offer a clear resolution or escalation path. Never dismiss concerns. Never use scripts that feel robotic.",
+    userTemplate: "Customer Issue: {{issue_description}}\nProduct/Service: {{product_name}}\nCustomer History: {{customer_tier}}",
+    variables: ["issue_description", "product_name", "customer_tier"],
+    examples: [
+      { id: "ex_1", input: "issue: billing charged twice, product: Premium Plan, tier: 2-year subscriber", output: "I completely understand how frustrating an unexpected double charge is, especially as a valued long-term subscriber. Here is exactly what I will do to resolve this..." }
+    ],
+    scores: { clarity: 94, constraintAdherence: 92, edgeCases: 89, tokenEfficiency: 91, overall: 92 },
+    scoringFeedback: { clarity: "Role is explicit and empathetic.", constraintAdherence: "Avoids scripted tone effectively.", edgeCases: "Handles escalation paths.", tokenEfficiency: "Compact and direct." },
+    tags: ["production", "customer-service"]
+  },
+  {
+    id: "tmpl_data_analyst",
+    name: "Advanced Data Insight Extractor",
+    category: "Data Analysis",
+    model: "Gemini 1.5 Pro",
+    description: "Transforms raw data descriptions or CSV-like inputs into actionable business intelligence reports.",
+    systemInstruction: "You are a Principal Data Analyst specializing in business intelligence. Extract key trends, anomalies, and actionable insights from raw data. Always present findings in structured JSON with trend indicators, confidence scores, and recommended actions.",
+    userTemplate: "Dataset: {{dataset_description}}\nTime Period: {{time_period}}\nBusiness Question: {{business_question}}",
+    variables: ["dataset_description", "time_period", "business_question"],
+    examples: [
+      { id: "ex_1", input: "Dataset: monthly SaaS signups Q1-Q4 2024, Period: FY2024, Question: Where did growth slow?", output: "{\n  \"trend\": \"Growth deceleration in Q3\",\n  \"confidence\": 0.87,\n  \"rootCause\": \"Reduced paid acquisition spend\",\n  \"recommendation\": \"Reallocate budget to retention campaigns\"\n}" }
+    ],
+    scores: { clarity: 96, constraintAdherence: 95, edgeCases: 91, tokenEfficiency: 93, overall: 94 },
+    scoringFeedback: { clarity: "Clear analytical persona.", constraintAdherence: "Enforces JSON output.", edgeCases: "Handles sparse data.", tokenEfficiency: "Structured but compact." },
+    tags: ["production", "data-analysis", "structured-output"]
+  },
+  {
+    id: "tmpl_devops_reviewer",
+    name: "Infrastructure as Code Reviewer",
+    category: "DevOps",
+    model: "Gemini 2.0 Flash",
+    description: "Reviews Terraform, Kubernetes, and Docker configurations for security misconfigurations and best practice violations.",
+    systemInstruction: "You are a Principal DevOps Platform Engineer specializing in infrastructure security. Review IaC files for misconfigurations, over-permissive IAM policies, exposed ports, missing encryption, and non-idempotent resources. Output findings as a structured severity-ranked report.",
+    userTemplate: "Infrastructure Code:\n```\n{{iac_code}}\n```\nTarget Platform: {{target_platform}}\nCompliance Standard: {{compliance_standard}}",
+    variables: ["iac_code", "target_platform", "compliance_standard"],
+    examples: [
+      { id: "ex_1", input: "iac_code: terraform S3 bucket with public_acl=public-read, platform: AWS, compliance: SOC2", output: "### [CRITICAL] Public S3 Bucket Exposure\n- Risk: Data exfiltration\n- Fix: Set acl = \"private\" and enable Block Public Access\n- Compliance: Violates SOC2 CC6.1" }
+    ],
+    scores: { clarity: 95, constraintAdherence: 96, edgeCases: 94, tokenEfficiency: 91, overall: 94 },
+    scoringFeedback: { clarity: "Expert DevOps persona.", constraintAdherence: "Structured severity output.", edgeCases: "Multi-platform coverage.", tokenEfficiency: "Concise findings format." },
+    tags: ["safety-hardened", "production", "devops"]
+  },
+  {
+    id: "tmpl_research_summarizer",
+    name: "Academic Research Synthesizer",
+    category: "Research & Analysis",
+    model: "Gemini 1.5 Pro",
+    description: "Synthesizes academic papers, technical documents, or long-form content into structured executive summaries with citations.",
+    systemInstruction: "You are a Senior Research Analyst with expertise in academic synthesis. Produce structured summaries identifying core claims, supporting evidence, methodology, limitations, and practical implications. Distinguish between strong empirical evidence and speculative claims.",
+    userTemplate: "Document to Analyze:\n{{document_content}}\n\nResearch Question: {{research_question}}\nTarget Audience: {{target_audience}}",
+    variables: ["document_content", "research_question", "target_audience"],
+    examples: [
+      { id: "ex_1", input: "document: [abstract of ML paper], question: practical applicability, audience: product team", output: "## Core Claim\nModel improves accuracy by 12%.\n## Evidence Strength: High (n=10,000)\n## Limitations\nTested only on English-language corpora.\n## Practical Implications\nViable for production with domain fine-tuning." }
+    ],
+    scores: { clarity: 97, constraintAdherence: 94, edgeCases: 90, tokenEfficiency: 88, overall: 93 },
+    scoringFeedback: { clarity: "Distinguishes fact from speculation.", constraintAdherence: "Structured output enforced.", edgeCases: "Handles sparse evidence.", tokenEfficiency: "Dense but appropriate." },
+    tags: ["production", "research", "safety-hardened"]
   }
 ];
 
@@ -357,7 +464,11 @@ app.get("/api/diagnostics", (req, res) => {
 });
 
 // AUTHENTICATION ENDPOINTS
-app.post("/api/auth/register", (req, res) => {
+// Rate limit brute-force attempts against credential endpoints.
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/login", authLimiter);
+
+app.post("/api/auth/register", async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password || !name) {
     return res.status(400).json({ error: "Email, password, and name are required." });
@@ -368,26 +479,32 @@ app.post("/api/auth/register", (req, res) => {
     return res.status(400).json({ error: "User already exists with this email address." });
   }
 
-  const newUser = {
-    id: "usr_" + Math.random().toString(36).substr(2, 9),
-    email: normalizedEmail,
-    password, // Store in plain text or simple hash since this is a secure sandbox environment
-    name: name.trim(),
-    bio: "AI Studio Prompt Architect in-training",
-    preferredModel: "Gemini 2.0 Flash",
-    provider: "local",
-    createdAt: new Date().toISOString(),
-  };
+  try {
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const newUser = {
+      id: "usr_" + Math.random().toString(36).substr(2, 9),
+      email: normalizedEmail,
+      passwordHash, // never store plain text
+      name: name.trim(),
+      bio: "AI Studio Prompt Architect in-training",
+      preferredModel: "Gemini 2.0 Flash",
+      provider: "local",
+      createdAt: new Date().toISOString(),
+    };
 
-  usersState[normalizedEmail] = newUser;
-  saveUsersToDisk();
+    usersState[normalizedEmail] = newUser;
+    saveUsersToDisk();
 
-  // Return user without password
-  const { password: _, ...userResponse } = newUser;
-  res.status(201).json(userResponse);
+    // Return user without password hash
+    const { passwordHash: _ph, ...userResponse } = newUser;
+    res.status(201).json(userResponse);
+  } catch (error: any) {
+    console.error("Registration failed:", error);
+    res.status(500).json({ error: "Failed to securely register the account." });
+  }
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
@@ -395,11 +512,20 @@ app.post("/api/auth/login", (req, res) => {
 
   const normalizedEmail = email.toLowerCase().trim();
   const user = usersState[normalizedEmail];
-  if (!user || user.password !== password) {
+
+  if (user && user.requiresPasswordReset) {
+    return res.status(403).json({
+      error: "This account requires a password reset following a security upgrade. Please reset your password.",
+      requiresPasswordReset: true,
+    });
+  }
+
+  const isValid = user ? await bcrypt.compare(password, user.passwordHash || "") : false;
+  if (!user || !isValid) {
     return res.status(401).json({ error: "Invalid email credentials or password." });
   }
 
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, passwordHash: _ph, ...userResponse } = user;
   res.json(userResponse);
 });
 
@@ -428,7 +554,7 @@ app.post("/api/auth/social", (req, res) => {
     saveUsersToDisk();
   }
 
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, passwordHash: _ph, ...userResponse } = user;
   res.json(userResponse);
 });
 
@@ -444,7 +570,7 @@ app.get("/api/auth/profile", (req, res) => {
     return res.status(404).json({ error: "Profile not found." });
   }
 
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, passwordHash: _ph, ...userResponse } = user;
   res.json(userResponse);
 });
 
@@ -469,7 +595,7 @@ app.post("/api/auth/profile", (req, res) => {
   usersState[normalizedEmail] = user;
   saveUsersToDisk();
 
-  const { password: _, ...userResponse } = user;
+  const { password: _pw, passwordHash: _ph, ...userResponse } = user;
   res.json(userResponse);
 });
 
@@ -573,12 +699,126 @@ app.get("/api/kb/search", (req, res) => {
   res.json(filtered);
 });
 
+// GET /api/search?q=<query>
+// Full-text search across sessions, history, templates, and knowledge base.
+app.get("/api/search", (req, res) => {
+  const q = ((req.query.q as string) || "").toLowerCase().trim();
+  if (!q || q.length < 2) {
+    return res.status(400).json({ error: "Query must be at least 2 characters." });
+  }
+
+  const results: Array<{
+    type: "session" | "template" | "history" | "knowledge";
+    id: string;
+    title: string;
+    snippet: string;
+    score: number;
+    metadata?: Record<string, any>;
+  }> = [];
+
+  // Search sessions (name + current prompt content)
+  Object.values(sessionsState).forEach((sess) => {
+    let score = 0;
+    if (sess.name.toLowerCase().includes(q)) score += 10;
+    if (sess.currentPrompt?.systemInstruction?.toLowerCase().includes(q)) score += 8;
+    if (sess.currentPrompt?.userTemplate?.toLowerCase().includes(q)) score += 6;
+    if (sess.currentPrompt?.tags?.some((t) => t.toLowerCase().includes(q))) score += 4;
+
+    if (score > 0) {
+      results.push({
+        type: "session",
+        id: sess.id,
+        title: sess.name,
+        snippet: sess.currentPrompt?.systemInstruction?.slice(0, 160) || "No prompt compiled yet.",
+        score,
+        metadata: { updatedAt: sess.updatedAt, promptVersion: sess.currentPrompt?.version },
+      });
+    }
+  });
+
+  // Search session history
+  Object.values(sessionsState).forEach((sess) => {
+    sess.history.forEach((item) => {
+      if (item.role === "system") return;
+      if (item.content.toLowerCase().includes(q)) {
+        results.push({
+          type: "history",
+          id: item.id,
+          title: `${sess.name} — ${item.type} (${item.role})`,
+          snippet: item.content.slice(0, 160),
+          score: 3,
+          metadata: { sessionId: sess.id, sessionName: sess.name, timestamp: item.timestamp, type: item.type },
+        });
+      }
+    });
+  });
+
+  // Search templates
+  PROMPT_TEMPLATES.forEach((tmpl) => {
+    let score = 0;
+    if (tmpl.name.toLowerCase().includes(q)) score += 10;
+    if (tmpl.description.toLowerCase().includes(q)) score += 7;
+    if (tmpl.category.toLowerCase().includes(q)) score += 5;
+    if (tmpl.systemInstruction.toLowerCase().includes(q)) score += 4;
+    if (tmpl.tags?.some((t) => t.toLowerCase().includes(q))) score += 3;
+
+    if (score > 0) {
+      results.push({
+        type: "template",
+        id: tmpl.id,
+        title: tmpl.name,
+        snippet: tmpl.description,
+        score,
+        metadata: { category: tmpl.category, model: tmpl.model, overallScore: tmpl.scores.overall },
+      });
+    }
+  });
+
+  // Search knowledge base
+  KNOWLEDGE_BASE.forEach((article) => {
+    let score = 0;
+    if (article.title.toLowerCase().includes(q)) score += 10;
+    if (article.summary.toLowerCase().includes(q)) score += 7;
+    if (article.content.toLowerCase().includes(q)) score += 4;
+    if (article.category.toLowerCase().includes(q)) score += 3;
+
+    if (score > 0) {
+      results.push({
+        type: "knowledge",
+        id: article.id,
+        title: article.title,
+        snippet: article.summary,
+        score,
+        metadata: { category: article.category },
+      });
+    }
+  });
+
+  results.sort((a, b) => b.score - a.score);
+
+  res.json({
+    query: q,
+    total: results.length,
+    results: results.slice(0, 50),
+  });
+});
+
 // List saved local sessions
 app.get("/api/sessions", (req, res) => {
   const list = Object.values(sessionsState).sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
   res.json(list);
+});
+
+// List all sessions whose current prompt is starred (favorited).
+// NOTE: must be declared before the "/api/sessions/:id" route so "starred"
+// is not interpreted as a session id.
+app.get("/api/sessions/starred", (req, res) => {
+  const starred = Object.values(sessionsState)
+    .filter((s) => s.currentPrompt?.starred)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  res.json(starred);
 });
 
 // Fetch single session
@@ -589,6 +829,31 @@ app.get("/api/sessions/:id", (req, res) => {
     return res.status(404).json({ error: "Session not found" });
   }
   res.json(session);
+});
+
+// Toggle starred status on a session's current prompt.
+app.patch("/api/sessions/:id/prompt/star", (req, res) => {
+  const sess = sessionsState[req.params.id];
+  if (!sess || !sess.currentPrompt) {
+    return res.status(404).json({ error: "Session or current prompt not found." });
+  }
+  sess.currentPrompt.starred = !sess.currentPrompt.starred;
+  sess.updatedAt = new Date().toISOString();
+  saveStateToDisk();
+  res.json({ success: true, starred: sess.currentPrompt.starred });
+});
+
+// Toggle archived status on a session.
+app.patch("/api/sessions/:id/archive", (req, res) => {
+  const sess = sessionsState[req.params.id];
+  if (!sess) {
+    return res.status(404).json({ error: "Session not found." });
+  }
+  const archived = req.body.archived ?? true;
+  (sess as any).archived = archived;
+  sess.updatedAt = new Date().toISOString();
+  saveStateToDisk();
+  res.json({ success: true, archived });
 });
 
 // Create session
@@ -682,155 +947,197 @@ function isApiKeyMissing() {
   return !API_KEY || API_KEY === 'MY_GEMINI_API_KEY';
 }
 
+// ----------------------------------------------------
+// TWO-PHASE PROMPT COMPILER
+// ----------------------------------------------------
+
+// Reusable JSON schema for Gemini structured prompt generation.
+const PROMPT_RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    systemInstruction: {
+      type: Type.STRING,
+      description: "The complete engineering system instruction block containing roles, priority constraints, and structural mandates.",
+    },
+    userTemplate: {
+      type: Type.STRING,
+      description: "The format user queries should be fed in, incorporating dynamic double curly brace variables (e.g., {{variable}}).",
+    },
+    variables: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+      description: "A list of parsed variable keys found in the user template.",
+    },
+    examples: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          id: { type: Type.STRING },
+          input: { type: Type.STRING, description: "Sample inputs filled into the variables structure." },
+          output: { type: Type.STRING, description: "The perfectly engineered, high-fidelity model target output." },
+        },
+        required: ["id", "input", "output"],
+      },
+    },
+    scores: {
+      type: Type.OBJECT,
+      properties: {
+        clarity: { type: Type.INTEGER, description: "Is the prompt clear, logical, and unambiguous?" },
+        constraintAdherence: { type: Type.INTEGER, description: "How strictly does it define negative limits and instructions?" },
+        edgeCases: { type: Type.INTEGER, description: "Does it address missing data, error handling, or fallback conditions?" },
+        tokenEfficiency: { type: Type.INTEGER, description: "Is it formatted to leverage static prefixes and maintain density?" },
+        overall: { type: Type.INTEGER, description: "The statistical average of the four metrics above." },
+      },
+      required: ["clarity", "constraintAdherence", "edgeCases", "tokenEfficiency", "overall"],
+    },
+    scoringFeedback: {
+      type: Type.OBJECT,
+      properties: {
+        clarity: { type: Type.STRING },
+        constraintAdherence: { type: Type.STRING },
+        edgeCases: { type: Type.STRING },
+        tokenEfficiency: { type: Type.STRING },
+      },
+      required: ["clarity", "constraintAdherence", "edgeCases", "tokenEfficiency"],
+    },
+  },
+  required: ["systemInstruction", "userTemplate", "variables", "examples", "scores", "scoringFeedback"],
+};
+
+// Convert a deterministic Phase 1 manifest into a persistable PromptDefinition.
+function manifestToPromptDefinition(manifest: PromptManifest): PromptDefinition {
+  return {
+    id: "pdef_" + Math.random().toString(36).substr(2, 9),
+    version: 1,
+    systemInstruction: manifest.systemInstruction,
+    userTemplate: manifest.userTemplate,
+    variables: [...manifest.variables],
+    examples: manifest.examples.map((ex) => ({ ...ex })),
+    createdAt: new Date().toISOString(),
+    scores: { ...manifest.scores },
+    scoringFeedback: { ...manifest.scoringFeedback },
+    tags: [...manifest.tags],
+  };
+}
+
+// Ensure the non-negotiable safety guardrails from Phase 1 survive Phase 2
+// refinement. If Gemini's rewritten instruction dropped them, re-append.
+function ensureGuardrailsPresent(systemInstruction: string, guardrails: string[]): string {
+  if (/SAFETY GUARDRAILS/i.test(systemInstruction)) {
+    return systemInstruction;
+  }
+  return `${systemInstruction}\n\nSAFETY GUARDRAILS (non-negotiable):\n${guardrails.map((g, i) => `${i + 1}. ${g}`).join("\n")}`;
+}
+
+/**
+ * Two-phase prompt compiler.
+ *
+ * PHASE 1 (always runs): the deterministic engine produces a valid manifest
+ *   with zero external dependencies, so this never fails.
+ * PHASE 2 (only with a valid API key): Gemini refines the Phase 1 manifest
+ *   into a richer, production-grade PromptDefinition. Safety guardrails and
+ *   the deterministic structure are preserved as a foundation.
+ *
+ * When no API key is configured, the Phase 1 result is returned directly as a
+ * real, useful output (no score-50 placeholder stub).
+ */
+async function compilePromptDefinition(
+  promptIdea: string,
+  contextDoc?: string,
+  requestedModel?: string
+): Promise<{ prompt: PromptDefinition; sandbox: boolean; manifest: PromptManifest }> {
+  // ── PHASE 1: Deterministic Engine (always runs, always succeeds) ──────────
+  const manifest = compileWithDeterministicEngine(promptIdea);
+
+  if (isApiKeyMissing()) {
+    const prompt = manifestToPromptDefinition(manifest);
+    return { prompt, sandbox: true, manifest };
+  }
+
+  // ── PHASE 2: Gemini Refinement (runs only if API key is available) ─────────
+  try {
+    const ai = getGeminiClient();
+    const ragKnowledge = constructRAGContext(promptIdea);
+
+    const phase2SystemInstruction = `
+You are an elite Google AI Studio prompt engineering system refining an already-structured prompt.
+
+A deterministic compiler has already produced a Phase 1 prompt manifest. Your job is to:
+1. IMPROVE the system instruction with richer, more precise language.
+2. ENHANCE the few-shot examples to be more realistic and domain-specific (wrap user instructions conceptually in <user_query> and target responses in <ideal_response> where helpful).
+3. REFINE the user template for maximum clarity, preserving {{variable}} placeholders.
+4. ADJUST scores (0-100) for clarity, constraintAdherence, edgeCases, tokenEfficiency, and overall to reflect the improved quality.
+5. PRESERVE all safety guardrails and core constraints — do not remove them.
+
+PHASE 1 MANIFEST (use as foundation, not replacement):
+${JSON.stringify(manifest, null, 2)}
+
+KNOWLEDGE BASE GUIDELINES:
+${ragKnowledge}
+
+${contextDoc ? `GROUNDING DOCUMENT:\n${contextDoc}\n` : ""}
+`;
+
+    const userMessage = `Refine and elevate this prompt for the goal: "${promptIdea}"`;
+
+    const response = await ai.models.generateContent({
+      model: requestedModel || "gemini-2.0-flash",
+      contents: userMessage,
+      config: {
+        systemInstruction: phase2SystemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: PROMPT_RESPONSE_SCHEMA,
+      },
+    });
+
+    const refined: PromptDefinition = JSON.parse(response.text || "{}");
+
+    // Merge Phase 2 over Phase 1, preserving guardrails and structure.
+    const prompt: PromptDefinition = {
+      id: "pdef_" + Math.random().toString(36).substr(2, 9),
+      version: 1,
+      systemInstruction: ensureGuardrailsPresent(
+        refined.systemInstruction || manifest.systemInstruction,
+        manifest.safetyGuardrails
+      ),
+      userTemplate: refined.userTemplate || manifest.userTemplate,
+      variables: (refined.variables && refined.variables.length > 0) ? refined.variables : [...manifest.variables],
+      examples: (refined.examples && refined.examples.length > 0)
+        ? refined.examples
+        : manifest.examples.map((ex) => ({ ...ex })),
+      createdAt: new Date().toISOString(),
+      scores: refined.scores || { ...manifest.scores },
+      scoringFeedback: refined.scoringFeedback || { ...manifest.scoringFeedback },
+      tags: [...new Set([...(manifest.tags || []).filter((t) => t !== "phase-1"), "phase-2"])],
+    };
+
+    return { prompt, sandbox: false, manifest };
+  } catch (error) {
+    // Phase 2 failed (quota, network, parse). Fall back to the real Phase 1 output.
+    console.error("[compilePromptDefinition] Phase 2 Gemini refinement failed, returning Phase 1 result:", error);
+    const prompt = manifestToPromptDefinition(manifest);
+    return { prompt, sandbox: true, manifest };
+  }
+}
+
 // POST endpoint: Full prompt optimization and creation
 app.post("/api/prompt/optimize", async (req, res) => {
-  const { promptIdea, contextDoc, sessionId } = req.body;
+  const { promptIdea, contextDoc, sessionId, model: requestedModel } = req.body;
   if (!promptIdea) {
     return res.status(400).json({ error: "Missing promptIdea parameter." });
   }
 
-  if (isApiKeyMissing()) {
-    const now = new Date().toISOString();
-    const words = promptIdea.split(/\s+/).filter((w) => w.length > 3);
-    const extractedVars = words.length >= 2
-      ? [words[0].toLowerCase().replace(/[^a-z]/g, ''), words[Math.min(1, words.length - 1)].toLowerCase().replace(/[^a-z]/g, '')]
-      : ["topic", "context"];
-
-    const sandboxPrompt = {
-      id: "pdef_" + Math.random().toString(36).substr(2, 9),
-      version: 1,
-      systemInstruction: "You are a specialized AI assistant designed for: " + promptIdea + ".\n\nCRITICAL CONSTRAINTS:\n- Respond only with structured, actionable content directly addressing the user's request.\n- Do NOT include greetings, pleasantries, or meta-commentary.\n- Use clear section headers and bullet points for readability.\n- If the input is ambiguous, state assumptions explicitly.\n- Always validate output matches the expected format.\n\n[SANDBOX MODE: Generated without Gemini API. Add GEMINI_API_KEY for AI-powered optimization.]",
-      userTemplate: "Provide analysis for: {{" + extractedVars[0] + "}} with context: {{" + extractedVars[1] + "}}",
-      variables: extractedVars,
-      examples: [
-        { id: "ex_sb_1", input: "Sample " + extractedVars[0] + " input", output: "Structured response addressing " + extractedVars[0] + " with clear formatting." },
-        { id: "ex_sb_2", input: "Edge case: empty " + extractedVars[1], output: "Assumption: No " + extractedVars[1] + " provided. Proceeding with defaults." }
-      ],
-      createdAt: now,
-      scores: { clarity: 72, constraintAdherence: 68, edgeCases: 60, tokenEfficiency: 75, overall: 69 },
-      scoringFeedback: {
-        clarity: "[SANDBOX] Template-based structure. Connect Gemini API for real scoring.",
-        constraintAdherence: "[SANDBOX] Basic negative constraints included.",
-        edgeCases: "[SANDBOX] Minimal coverage. Real optimization adds comprehensive guards.",
-        tokenEfficiency: "[SANDBOX] Standard token layout."
-      }
-    };
-
-    if (sessionId && sessionsState[sessionId]) {
-      const sess = sessionsState[sessionId];
-      sess.history.push(
-        { id: "hist_" + Math.random().toString(36).substr(2, 9), role: "user", content: "Refine/Optimize prompt idea: " + promptIdea, timestamp: now, type: "optimize" },
-        { id: "hist_" + Math.random().toString(36).substr(2, 9), role: "assistant", content: "[SANDBOX MODE] Generated template-based prompt. Overall: " + sandboxPrompt.scores.overall + "/100 (sandbox estimate). Add GEMINI_API_KEY for production optimization.", timestamp: now, type: "optimize", metadata: { optimizedPrompt: sandboxPrompt, extractedVariables: sandboxPrompt.variables } }
-      );
-      sess.currentPrompt = sandboxPrompt;
-      sess.versionHistory.push(sandboxPrompt);
-      sess.updatedAt = now;
-      saveStateToDisk();
-    }
-    return res.json(sandboxPrompt);
-  }
-
   try {
-    const ai = getGeminiClient();
-    const ragKnowledge = constructRAGContext(promptIdea);
-    
-    const optimizationSystemInstruction = `
-You are an elite, world-class Google AI Studio prompt engineering system. Your mission is to rewrite and optimize a raw user prompt or goal into a pristine, production-ready, highly organized system instruction and template format matching Gemini's architecture.
-
-CRITICAL INSTRUCTIONS:
-1. DESIGN AN EXPLICIT ROLE/IDENTITY: Define a highly detailed persona that locks down tone, constraints, and objective boundaries.
-2. ENFORCE STRIFE-FREE BULLETPROOF CONSTRAINTS: Always write active negatives to prevent conversational bloat, introductory fluff, or greeting lines.
-3. EXTRACT ALL DYNAMIC VARIABLES: Mark placeholders with double curly braces like {{variable_name}}.
-4. DELIVER HIGH-IMPACT XML FEW-SHOT EXAMPLES: Always output 2 realistic input/output pairs matching real-use cases. Wrap user instructions in <user_query> and target responses in <ideal_response>.
-5. SCORE YOUR GENERATION: Rate your output from 0 to 100 on clarity, constraintAdherence, edgeCases, and tokenEfficiency. Make sure your score is objective, highlighting what works and where potential risks lie.
-
-GUIDELINES SCANNED FROM AI STUDIO SOURCE CONTEXT:
-${ragKnowledge}
-
-${contextDoc ? `USER ATTACHED GROUNDING DOCUMENT CONTENT:\n${contextDoc}\n` : ""}
-`;
-
-    const userMessage = `Optimize this prompt goal: "${promptIdea}"`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: userMessage,
-      config: {
-        systemInstruction: optimizationSystemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            systemInstruction: {
-              type: Type.STRING,
-              description: "The complete engineering system instruction block containing roles, priority constraints, and structural mandates.",
-            },
-            userTemplate: {
-              type: Type.STRING,
-              description: "The format user queries should be fed in, incorporating dynamic double curly brace variables (e.g., {{variable}}).",
-            },
-            variables: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "A list of parsed variable keys found in the user template.",
-            },
-            examples: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  input: { type: Type.STRING, description: "Sample inputs filled into the variables structure." },
-                  output: { type: Type.STRING, description: "The perfectly engineered, high-fidelity model target output." },
-                },
-                required: ["id", "input", "output"],
-              },
-            },
-            scores: {
-              type: Type.OBJECT,
-              properties: {
-                clarity: { type: Type.INTEGER, description: "Is the prompt clear, logical, and unambiguous?" },
-                constraintAdherence: { type: Type.INTEGER, description: "How strictly does it define negative limits and instructions?" },
-                edgeCases: { type: Type.INTEGER, description: "Does it address missing data, error handling, or fallback conditions?" },
-                tokenEfficiency: { type: Type.INTEGER, description: "Is it formatted to leverage static prefixes and maintain density?" },
-                overall: { type: Type.INTEGER, description: "The statistical average of the four metrics above." },
-              },
-              required: ["clarity", "constraintAdherence", "edgeCases", "tokenEfficiency", "overall"],
-            },
-            scoringFeedback: {
-              type: Type.OBJECT,
-              properties: {
-                clarity: { type: Type.STRING },
-                constraintAdherence: { type: Type.STRING },
-                edgeCases: { type: Type.STRING },
-                tokenEfficiency: { type: Type.STRING },
-              },
-              required: ["clarity", "constraintAdherence", "edgeCases", "tokenEfficiency"],
-            },
-          },
-          required: [
-            "systemInstruction",
-            "userTemplate",
-            "variables",
-            "examples",
-            "scores",
-            "scoringFeedback",
-          ],
-        },
-      },
-    });
-
-    const optimizedData: PromptDefinition = JSON.parse(response.text || "{}");
-    optimizedData.id = "pdef_" + Math.random().toString(36).substr(2, 9);
-    optimizedData.version = 1;
-    optimizedData.createdAt = new Date().toISOString();
+    // Two-phase pipeline: deterministic Phase 1 always runs; Gemini Phase 2
+    // refines it when an API key is present. Either way we get a real prompt.
+    const { prompt: optimizedData, sandbox } = await compilePromptDefinition(promptIdea, contextDoc, requestedModel);
 
     // Persist optimized prompt to active session if provided
     if (sessionId && sessionsState[sessionId]) {
       const sess = sessionsState[sessionId];
-      
-      // Update session history
       const now = new Date().toISOString();
+
       const userItem: PromptHistoryItem = {
         id: "hist_" + Math.random().toString(36).substr(2, 9),
         role: "user",
@@ -838,11 +1145,15 @@ ${contextDoc ? `USER ATTACHED GROUNDING DOCUMENT CONTENT:\n${contextDoc}\n` : ""
         timestamp: now,
         type: "optimize",
       };
-      
+
+      const assistantContent = sandbox
+        ? `I compiled an optimized prompt using the **deterministic Phase 1 engine** (no Gemini API key configured). Overall Rating: **${optimizedData.scores.overall}/100**.\n\n### Optimization Summary\n\n- **Clarity**: ${optimizedData.scoringFeedback.clarity}\n- **Constraint Adherence**: ${optimizedData.scoringFeedback.constraintAdherence}\n- **Edge Cases**: ${optimizedData.scoringFeedback.edgeCases}\n- **Token Efficiency**: ${optimizedData.scoringFeedback.tokenEfficiency}\n\n_Add a GEMINI_API_KEY to enable Phase 2 AI refinement._`
+        : `I have engineered and scored an optimized prompt candidate! Overall Rating: **${optimizedData.scores.overall}/100**.\n\n### Optimization Summary\n\n- **Clarity**: ${optimizedData.scoringFeedback.clarity}\n- **Constraint Adherence**: ${optimizedData.scoringFeedback.constraintAdherence}\n- **Edge Cases**: ${optimizedData.scoringFeedback.edgeCases}\n- **Token Efficiency**: ${optimizedData.scoringFeedback.tokenEfficiency}`;
+
       const assistantItem: PromptHistoryItem = {
         id: "hist_" + Math.random().toString(36).substr(2, 9),
         role: "assistant",
-        content: `I have engineered and scored an optimized prompt candidate! Overall Rating: **${optimizedData.scores.overall}/100**.\n\n### Optimization Summary\n\n- **Clarity**: ${optimizedData.scoringFeedback.clarity}\n- **Constraint Adherence**: ${optimizedData.scoringFeedback.constraintAdherence}\n- **Edge Cases**: ${optimizedData.scoringFeedback.edgeCases}\n- **Token Efficiency**: ${optimizedData.scoringFeedback.tokenEfficiency}`,
+        content: assistantContent,
         timestamp: now,
         type: "optimize",
         metadata: {
@@ -862,6 +1173,174 @@ ${contextDoc ? `USER ATTACHED GROUNDING DOCUMENT CONTENT:\n${contextDoc}\n` : ""
   } catch (error: any) {
     console.error("Optimization failed:", error);
     res.status(500).json({ error: error.message || "Prompt optimization failed." });
+  }
+});
+
+// POST endpoint: Batch generation of multiple prompt variants for one idea.
+// count: number of variants to generate (1–10, default 3)
+app.post("/api/prompt/batch", async (req, res) => {
+  const { promptIdea, contextDoc, sessionId, count = 3, model: requestedModel } = req.body;
+  if (!promptIdea) {
+    return res.status(400).json({ error: "Missing promptIdea parameter." });
+  }
+  const variantCount = Math.min(Math.max(1, Number(count) || 3), 10);
+  const batchModel = requestedModel || "gemini-2.0-flash";
+
+  const angles = [
+    "", // baseline
+    " Focus on maximum constraint coverage and edge case handling.",
+    " Focus on token efficiency and conciseness.",
+    " Emphasize creative and distinctive few-shot examples.",
+    " Optimize for structured JSON output compatibility.",
+    " Prioritize safety guardrails and compliance.",
+    " Use an alternative expert persona and role framing.",
+    " Focus on instructional clarity for non-technical users.",
+    " Emphasize multi-turn conversational adaptability.",
+    " Optimize for long-context document processing tasks.",
+  ];
+
+  try {
+    const variants: PromptDefinition[] = [];
+
+    for (let i = 0; i < variantCount; i++) {
+      const ideaWithAngle = promptIdea + (angles[i] || "");
+      const { prompt } = await compilePromptDefinition(ideaWithAngle, contextDoc, batchModel);
+      prompt.tags = [...new Set([...(prompt.tags || []), `variant-${i + 1}`])];
+      variants.push(prompt);
+    }
+
+    // If a session is provided, log the batch operation to history
+    if (sessionId && sessionsState[sessionId]) {
+      const sess = sessionsState[sessionId];
+      const now = new Date().toISOString();
+      const histItem: PromptHistoryItem = {
+        id: "hist_" + Math.random().toString(36).substr(2, 9),
+        role: "assistant",
+        content: `### Batch Generation Complete\n\nGenerated **${variants.length} prompt variants** for: *"${promptIdea}"*\n\n${variants.map((v, i) => `**Variant ${i + 1}** — Overall Score: **${v.scores.overall}/100**`).join("\n")}`,
+        timestamp: now,
+        type: "optimize",
+        metadata: { optimizedPrompt: variants[0], extractedVariables: variants[0].variables },
+      };
+      sess.history.push(histItem);
+      sess.updatedAt = now;
+      saveStateToDisk();
+    }
+
+    res.json({ success: true, variants, count: variants.length });
+  } catch (error: any) {
+    console.error("Batch generation failed:", error);
+    res.status(500).json({ error: error.message || "Batch generation failed." });
+  }
+});
+
+// POST endpoint: Export a PromptDefinition in various formats.
+// format: 'json' | 'markdown' | 'plain' | 'aistudio'
+app.post("/api/prompt/export", (req, res) => {
+  const { promptDefinition, format = "json" } = req.body;
+
+  if (!promptDefinition) {
+    return res.status(400).json({ error: "Missing promptDefinition payload." });
+  }
+
+  const p: PromptDefinition = promptDefinition;
+  const safeVersion = p.version ?? 1;
+  const safeId = p.id || "export";
+
+  switch (format) {
+    case "json": {
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="prompt_v${safeVersion}_${safeId}.json"`);
+      return res.send(JSON.stringify(p, null, 2));
+    }
+
+    case "markdown": {
+      const md = [
+        `# Prompt Export — v${safeVersion}`,
+        `> Generated: ${p.createdAt ? new Date(p.createdAt).toLocaleString() : new Date().toLocaleString()}  `,
+        `> Tags: ${(p.tags || []).join(", ") || "none"}`,
+        `> Overall Score: **${p.scores?.overall ?? "n/a"}/100**`,
+        "",
+        "## System Instruction",
+        "```",
+        p.systemInstruction,
+        "```",
+        "",
+        "## User Template",
+        "```",
+        p.userTemplate,
+        "```",
+        "",
+        `## Variables`,
+        (p.variables || []).map((v) => `- \`{{${v}}}\``).join("\n"),
+        "",
+        "## Few-Shot Examples",
+        ...(p.examples || []).flatMap((ex, i) => [
+          `### Example ${i + 1}`,
+          `**Input:** ${ex.input}`,
+          "",
+          `**Output:** ${ex.output}`,
+          "",
+        ]),
+        "## Quality Scores",
+        `| Dimension | Score | Feedback |`,
+        `|-----------|-------|---------|`,
+        `| Clarity | ${p.scores?.clarity ?? "-"}/100 | ${p.scoringFeedback?.clarity ?? ""} |`,
+        `| Constraint Adherence | ${p.scores?.constraintAdherence ?? "-"}/100 | ${p.scoringFeedback?.constraintAdherence ?? ""} |`,
+        `| Edge Cases | ${p.scores?.edgeCases ?? "-"}/100 | ${p.scoringFeedback?.edgeCases ?? ""} |`,
+        `| Token Efficiency | ${p.scores?.tokenEfficiency ?? "-"}/100 | ${p.scoringFeedback?.tokenEfficiency ?? ""} |`,
+        `| **Overall** | **${p.scores?.overall ?? "-"}/100** | |`,
+      ].join("\n");
+
+      res.setHeader("Content-Type", "text/markdown");
+      res.setHeader("Content-Disposition", `attachment; filename="prompt_v${safeVersion}_${safeId}.md"`);
+      return res.send(md);
+    }
+
+    case "plain": {
+      const plain = [
+        `SYSTEM INSTRUCTION:`,
+        p.systemInstruction,
+        "",
+        `USER TEMPLATE:`,
+        p.userTemplate,
+        "",
+        `VARIABLES: ${(p.variables || []).join(", ")}`,
+      ].join("\n");
+
+      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Content-Disposition", `attachment; filename="prompt_v${safeVersion}_${safeId}.txt"`);
+      return res.send(plain);
+    }
+
+    case "aistudio": {
+      // Google AI Studio ready format — system instruction + template combined
+      const aiStudio = {
+        systemInstruction: p.systemInstruction,
+        userMessage: p.userTemplate,
+        model: "gemini-2.0-flash",
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 2048,
+        },
+        examples: (p.examples || []).map((ex) => ({
+          input: { content: ex.input },
+          output: { content: ex.output },
+        })),
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          version: safeVersion,
+          overallScore: p.scores?.overall,
+          variables: p.variables || [],
+        },
+      };
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="aistudio_prompt_v${safeVersion}_${safeId}.json"`);
+      return res.send(JSON.stringify(aiStudio, null, 2));
+    }
+
+    default:
+      return res.status(400).json({ error: `Unsupported format "${format}". Use: json, markdown, plain, aistudio` });
   }
 });
 
@@ -953,7 +1432,7 @@ ${currentPromptState}
 
     // Call Gemini with schema instructions for structured updates
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.0-flash",
       contents: [
         {
           role: "user",
@@ -1134,7 +1613,7 @@ USER'S CORRECT SPECIFICATION / EXPECTATION:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.0-flash",
       contents: payload,
       config: {
         systemInstruction,
@@ -1291,7 +1770,7 @@ app.post("/api/prompt/run-tests", async (req, res) => {
       const testGenSystem = `You are a strict QA engineer validating AI Studio prompt configurations. Generate exactly three robust test inputs for a prompt template that takes the following variables: ${JSON.stringify(activePrompt.variables)}. Each test case should specifically target different edge conditions, complex/challenging requests, or invalid inputs. Ensure output structure adheres strictly to the schema.`;
       
       const genResponse = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.0-flash",
         contents: `Create robust evaluation cases for: System: "${activePrompt.systemInstruction}" and Template: "${activePrompt.userTemplate}"`,
         config: {
           systemInstruction: testGenSystem,
@@ -1325,7 +1804,7 @@ app.post("/api/prompt/run-tests", async (req, res) => {
     const testRunsOutputs: any[] = [];
     const modelsToExecuteQuery: string[] = (models && Array.isArray(models) && models.length > 0) 
       ? models 
-      : ["gemini-3.5-flash"];
+      : ["gemini-2.0-flash"];
 
     // Run each scenario sequentially
     for (const scenario of scenariosToRun) {
@@ -1376,7 +1855,7 @@ app.post("/api/prompt/run-tests", async (req, res) => {
 
         if (!execFailed) {
           try {
-            // Evaluation analysis evaluator step (using gemini-3.5-flash for independent objective audit checks)
+            // Evaluation analysis evaluator step (using gemini-2.0-flash for independent objective audit checks)
             const critEvalSystem = `
 You are a separate, objective QA audit system.
 Compare the actual AI execution response against a set of expected validation checklists.
@@ -1405,7 +1884,7 @@ ${JSON.stringify(scenario.expectedCriteria)}
 `;
 
             const evalResponse = await ai.models.generateContent({
-              model: "gemini-3.5-flash",
+              model: "gemini-2.0-flash",
               contents: evalPrompt,
               config: {
                 systemInstruction: critEvalSystem,
@@ -1584,7 +2063,7 @@ ${JSON.stringify(testRuns, null, 2)}
       `;
 
       const gRes = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.0-flash",
         contents: promptPrompt,
         config: {
           systemInstruction: "You are a professional Prompt Structuring agent for Gemini models. You must produce a flawlessJSON structure satisfying the required schema exactly.",

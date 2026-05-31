@@ -466,7 +466,7 @@ export default function TestingSuite({
                             <div key={runIdx} className="rounded-xl border border-glass bg-[#07101f]/35 p-4 space-y-3 font-sans">
                               <div className="flex justify-between items-center border-b border-glass pb-2">
                                 <span className="font-mono text-[9px] font-black text-brand-primary uppercase tracking-tight truncate max-w-[150px]">
-                                  {r.model || "gemini-3.5-flash"}
+                                  {r.model || "gemini-2.0-flash"}
                                 </span>
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <span className="text-[9px] font-mono text-brand-muted/40 font-bold">
