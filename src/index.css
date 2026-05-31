@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-deep: #040910;
+  --color-brand-secondary: #07101F;
+  --color-brand-surface: rgba(255, 255, 255, 0.026);
+  --color-brand-elevated: rgba(255, 255, 255, 0.035);
+  --color-brand-primary: #EDF2FF;
+  --color-brand-muted: #9BAAD4;
+  --color-brand-muted-dark: #68789F;
+  
+  --color-accent-mint: #6CECC8;
+  --color-accent-cyan: #6CECC8;
+  --color-accent-emerald: #6CECC8;
+  --color-accent-blue: #79AEFF;
+  --color-accent-violet: #B48FFF;
+  --color-accent-rose: #FF7890;
+  --color-accent-gold: #FFBA6A;
+  
+  --font-sans: "Inter", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-space: "Space Grotesk", sans-serif;
+  --font-sora: "Sora", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background-color: #040910;
+  color: #EDF2FF;
+  font-family: var(--font-sans);
+}
+
+.bg-cyber-grid {
+  background-color: #040910;
+  background-image: 
+    radial-gradient(circle at top left, rgba(108, 236, 200, 0.045) 0%, transparent 40%),
+    radial-gradient(circle at bottom right, rgba(121, 174, 255, 0.045) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+  background-position: center center;
+}
+
+/* UI Density Sizing Variables */
+:root {
+  --scale-padding: 1.25rem;
+  --scale-gap: 1rem;
+  --scale-text-base: 0.8125rem;
+  --scale-height-input: 3rem;
+}
+
+.density-compact {
+  --scale-padding: 0.75rem;
+  --scale-gap: 0.625rem;
+  --scale-text-base: 0.75rem;
+  --scale-height-input: 2.25rem;
+}
+
+.density-comfortable {
+  --scale-padding: 1.25rem;
+  --scale-gap: 1rem;
+  --scale-text-base: 0.8125rem;
+  --scale-height-input: 3rem;
+}
+
+.density-spacious {
+  --scale-padding: 1.75rem;
+  --scale-gap: 1.5rem;
+  --scale-text-base: 0.9375rem;
+  --scale-height-input: 3.5rem;
+}
+
+/* Glassmorphism custom spatial depth utility classes (Linear/Vercel inspired) */
+.glass-pane {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass-pane-dark {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+.glass-pane-input {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-pane-input:focus {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(108, 236, 200, 0.35);
+  box-shadow: 0 0 12px rgba(108, 236, 200, 0.15), inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.tactile-glow {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 0 1px rgba(108, 236, 200, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tactile-glow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(108, 236, 200, 0.25), 0 0 1px 1px rgba(108, 236, 200, 0.5);
+}
+
+.tactile-glow-purple {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 0 1px rgba(180, 143, 255, 0.08);
+}
+
+.tactile-glow-purple:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(180, 143, 255, 0.25), 0 0 1px 1px rgba(180, 143, 255, 0.5);
+}
+
+/* Custom visual scrollbars */
+.sidebar-no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.sidebar-no-scrollbar::-webkit-scrollbar {
+  display: none !important;  /* Chrome, Safari, and Opera */
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 236, 200, 0.35);
+}
