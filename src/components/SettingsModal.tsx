@@ -199,8 +199,12 @@ export default function SettingsModal({
   const executeGitHubCommitPush = () => {
     if (!gitCommitMsg.trim() || !activePrompt) return;
     const next = { ...integrations };
-    const hash = "git_rev_" + Math.random().toString(36).substr(2, 7);
+    const hash = "sandbox_" + Math.random().toString(36).substr(2, 7);
     next.github.lastCommitHash = hash;
+    next.github.syncTime = new Date().toISOString();
+    if (!next.github.mode || next.github.mode !== "REAL") {
+      next.github.mode = "SANDBOX";
+    }
     onUpdateIntegrations(next);
     setGithubCommitLog(prev => [`Pushed commit [${hash}] // ${gitCommitMsg}`, ...prev]);
     setGitCommitMsg("");

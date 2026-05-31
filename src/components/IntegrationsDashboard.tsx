@@ -26,25 +26,55 @@ export default function IntegrationsDashboard({
   onHuggingFaceTemplatePicked,
 }: IntegrationsDashboardProps) {
   const [gitCommitMsg, setGitCommitMsg] = useState("");
-  const [gitBranch] = useState("main");
   const [, setSelectedDriveFileId] = useState<string | null>(null);
   const [, setSelectedNotebookNotesId] = useState<string | null>(null);
   const [showRepoTooltip, setShowRepoTooltip] = useState(false);
 
-  // High-fidelity structured Google Drive documents catalog representing grounding assets
+  const githubMode = integrations?.github?.mode;
+  const githubConnected = integrations?.github?.connected;
+
+  const getGitBranchDisplay = () => {
+    if (!githubConnected) return "Not connected";
+    if (!integrations.github.branch) return "Awaiting Credentials";
+    return integrations.github.branch;
+  };
+
+  const getRepoNameDisplay = () => {
+    if (!githubConnected) return "Not configured";
+    if (!integrations.github.repoName) return "Not configured";
+    return integrations.github.repoName;
+  };
+
+  const getCommitHashDisplay = () => {
+    if (!githubConnected) return "Awaiting Credentials";
+    if (!integrations.github.lastCommitHash || integrations.github.lastCommitHash === "No sync history yet") {
+      return "No sync history yet";
+    }
+    return integrations.github.lastCommitHash;
+  };
+
+  const getCommitHashShort = () => {
+    const hash = getCommitHashDisplay();
+    if (hash === "No sync history yet" || hash === "Awaiting Credentials") return null;
+    return hash.substring(0, 7);
+  };
+
+  const getSyncModeLabel = () => {
+    if (!githubConnected) return "NOT CONNECTED";
+    return githubMode === "REAL" ? "REAL PIPELINE" : "SANDBOX/MOCKED";
+  };
+
   const GOOGLE_DRIVE_FILES = [
     { id: "gd_policy_gdpr", name: "Client_GDPR_Compliance_Policy.md", size: "24 KB", content: "CRITICAL COMPLIANCE TARGETS:\n- Keep all client data locked within continental boundaries.\n- Delete historic cookies on browser termination.\n- Explicitly cite GDPR article index when answering safety questions." },
     { id: "gd_api_standard", name: "Global_Banking_API_Specifications.json", size: "45 KB", content: "BANKING ROUTER RULES:\n- Use /v3/accounts/transfer endpoint for transactions.\n- Return only explicit ISO standard error strings on rejections.\n- Always guard input parameters securely from code-injection." },
     { id: "gd_support_guide", name: "Support_Escalation_Workflows.txt", size: "12 KB", content: "ESCALATION RAILS:\n- If client asks for standard balance, respond directly.\n- If client asks for manual account audits, transfer cleanly to manager-on-call.\n- Never reveal supervisor personal information." }
   ];
 
-  // NotebookLM grounding assets notes
   const NOTEBOOK_LM_PROJECTS = [
     { id: "nlm_marketing", name: "Brand tone & Writing Guidelines", notes: 14, content: "BRAND ATTRIBUTES:\n- Avoid corporate slang or high-pitched sales greetings.\n- Sound polite, minimalist, and objective.\n- Format all support lists as elegant Bullet points." },
     { id: "nlm_tech", name: "Developer Code guidelines", notes: 25, content: "CODE STYLE PRINCIPLES:\n- Prioritize Named imports for type cleanliness.\n- Never write trailing commas inside JSON objects.\n- Embed error fallback states directly." }
   ];
 
-  // Hugging Face community templates
   const HUGGING_FACE_TEMPLATES = [
     {
       id: "hf_writer_v2",
@@ -85,12 +115,16 @@ export default function IntegrationsDashboard({
     } else if (key === "github") {
       next.github.connected = !next.github.connected;
       if (next.github.connected) {
-        next.github.repoName = "ai-studio-prompt-templates";
-        next.github.branch = "main";
+        next.github.repoName = next.github.repoName || "Not configured";
+        next.github.branch = next.github.branch || "Awaiting Credentials";
+        next.github.mode = next.github.mode || "SANDBOX";
       } else {
         next.github.repoName = undefined;
         next.github.branch = undefined;
         next.github.lastCommitHash = undefined;
+        next.github.syncTime = undefined;
+        next.github.syncStatus = undefined;
+        next.github.mode = undefined;
       }
     } else if (key === "huggingFace") {
       next.huggingFace.connected = !next.huggingFace.connected;
@@ -101,22 +135,18 @@ export default function IntegrationsDashboard({
   const handleLinkDriveFile = (fileId: string) => {
     const file = GOOGLE_DRIVE_FILES.find(f => f.id === fileId);
     if (!file) return;
-
     const next = { ...integrations };
     next.googleDrive.linkedDocId = file.id;
     next.googleDrive.linkedDocName = file.name;
     next.googleDrive.linkedDocContent = file.content;
     onUpdateIntegrations(next);
     setSelectedDriveFileId(file.id);
-
-    // Call callback to inject text content directly to grounding
     onInjectGroundingContent(file.content, file.name);
   };
 
   const handleLinkNotebookProject = (projectId: string) => {
     const proj = NOTEBOOK_LM_PROJECTS.find(p => p.id === projectId);
     if (!proj) return;
-
     const next = { ...integrations };
     next.notebookLM.linkedProjectId = proj.id;
     next.notebookLM.linkedProjectName = proj.name;
@@ -124,15 +154,18 @@ export default function IntegrationsDashboard({
     next.notebookLM.linkedContent = proj.content;
     onUpdateIntegrations(next);
     setSelectedNotebookNotesId(proj.id);
-    
     onInjectGroundingContent(proj.content, proj.name);
   };
 
   const executeGitHubCommitPush = () => {
     if (!gitCommitMsg.trim() || !activePrompt) return;
-
     const next = { ...integrations };
-    next.github.lastCommitHash = "git_rev_" + Math.random().toString(36).substr(2, 7);
+    const hash = "sandbox_" + Math.random().toString(36).substr(2, 7);
+    next.github.lastCommitHash = hash;
+    next.github.syncTime = new Date().toISOString();
+    if (!next.github.mode || next.github.mode !== "REAL") {
+      next.github.mode = "SANDBOX";
+    }
     onUpdateIntegrations(next);
     setGitCommitMsg("");
   };
@@ -197,7 +230,7 @@ export default function IntegrationsDashboard({
             </div>
           ) : (
             <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
-              Connection to Google Drive not active. Click "Connect" above to access workspace files.
+              Connection to Google Drive not active. Click &quot;Connect&quot; above to access workspace files.
             </div>
           )}
         </div>
@@ -256,7 +289,7 @@ export default function IntegrationsDashboard({
             </div>
           ) : (
             <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
-              Connection to NotebookLM not active. Click "Connect" above to sync research.
+              Connection to NotebookLM not active. Click &quot;Connect&quot; above to sync research.
             </div>
           )}
         </div>
@@ -285,12 +318,12 @@ export default function IntegrationsDashboard({
             </button>
           </div>
 
-          {integrations.github.connected && activePrompt ? (
+          {githubConnected && activePrompt ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-[10px] font-mono select-none">
                 <div className="bg-white/5 p-2 rounded-xl border border-white/10 flex items-center gap-2.5 text-white/70">
                   <GitBranch className="h-4 w-4 text-white/30" />
-                  <span>Branch: <strong className="text-white font-mono">{gitBranch}</strong></span>
+                  <span>Branch: <strong className="text-white font-mono">{getGitBranchDisplay()}</strong></span>
                 </div>
                 <div 
                   className="bg-white/5 p-2 rounded-xl border border-white/10 flex items-center gap-2.5 text-white/70 relative cursor-help select-none"
@@ -298,21 +331,41 @@ export default function IntegrationsDashboard({
                   onMouseLeave={() => setShowRepoTooltip(false)}
                 >
                   <GitCommit className="h-4 w-4 text-white/30" />
-                  <span>Repo: <strong className="text-white font-mono">{integrations.github.repoName || "Not configured"}</strong></span>
+                  <span>Repo: <strong className={`font-mono ${githubMode === "SANDBOX" ? "text-cyan-300" : "text-white"}`}>{getRepoNameDisplay()}</strong></span>
 
                   {showRepoTooltip && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 p-2.5 w-60 bg-[#07101F]/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-md animate-fade-in text-[10px] uppercase text-[#9BAAD4] space-y-1">
-                      <div className="flex items-center gap-1.5 text-[#6CECC8] font-black border-b border-white/5 pb-1 tracking-wide">
-                        <GitCommit className="h-3.5 w-3.5 text-[#6CECC8]" />
-                        <span>Repository Context</span>
-                      </div>
-                      <div className="space-y-0.5 pt-1 text-[8px] font-mono leading-tight text-left">
-                        <p className="flex justify-between">CONNECTED: <span className="text-white font-bold">{integrations.github.connected ? "YES" : "NO"}</span></p>
-                        <p className="flex justify-between">SYNC STATE: <span className={integrations.github.connected ? "text-emerald-400 font-bold" : "text-amber-500 font-bold"}>
-                          {integrations.github.connected ? (integrations.github.mode === "REAL" ? "REAL PIPELINE" : "SANDBOX/MOCKED") : "NOT CONNECTED"}
-                        </span></p>
-                        <p className="flex justify-between">COMMIT HASH: <span className="text-[#bfdbfe] font-bold">{integrations.github.lastCommitHash || "No sync history yet"}</span></p>
-                        <p className="flex justify-between">TIME: <span className="text-white/40">{integrations.github.syncTime ? new Date(integrations.github.syncTime).toLocaleTimeString() : "Awaiting sync"}</span></p>
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-64 bg-[#07101F]/95 border border-[#6CECC8]/15 rounded-xl shadow-2xl backdrop-blur-md text-[10px] uppercase text-[#9BAAD4] overflow-hidden transition-all duration-200 animate-fade-in">
+                      <div className="p-2.5 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[#6CECC8] font-black border-b border-white/5 pb-1.5 tracking-wide">
+                          <GitCommit className="h-3.5 w-3.5 text-[#6CECC8]" />
+                          <span>Repository Context</span>
+                        </div>
+                        <div className="space-y-1 pt-1 text-[8px] font-mono leading-tight text-left">
+                          <p className="flex justify-between">CONNECTED: <span className="text-white font-bold">{githubConnected ? "YES" : "NO"}</span></p>
+                          <p className="flex justify-between">SYNC STATE: <span className={githubConnected ? (githubMode === "REAL" ? "text-emerald-400 font-bold" : "text-cyan-400 font-bold") : "text-amber-500 font-bold"}>
+                            {getSyncModeLabel()}
+                          </span></p>
+                          <p className="flex justify-between items-center">
+                            COMMIT HASH:
+                            <span className="text-[#bfdbfe] font-bold flex items-center gap-1">
+                              {getCommitHashShort() ? (
+                                <>
+                                  <span className="text-[#6CECC8]/80">{getCommitHashShort()}</span>
+                                  <span className="text-white/20 text-[7px]">({getCommitHashDisplay()})</span>
+                                </>
+                              ) : (
+                                <span className="text-white/40">{getCommitHashDisplay()}</span>
+                              )}
+                            </span>
+                          </p>
+                          <p className="flex justify-between">TIME: <span className="text-white/40">{integrations.github.syncTime ? new Date(integrations.github.syncTime).toLocaleTimeString() : "Awaiting sync"}</span></p>
+                          {githubMode === "SANDBOX" && (
+                            <p className="flex justify-between mt-1 pt-1 border-t border-cyan-500/15">
+                              <span className="text-cyan-400/60">MODE</span>
+                              <span className="text-cyan-300 font-bold">SANDBOX</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -340,11 +393,11 @@ export default function IntegrationsDashboard({
               </div>
 
               {/* Version revision diff overview */}
-              {integrations.github.lastCommitHash && (
+              {integrations.github.lastCommitHash && integrations.github.lastCommitHash !== "No sync history yet" && (
                 <div className="border border-white/10 rounded-2xl overflow-hidden bg-black font-mono text-[10px] text-white/80">
                   <div className="bg-white/5 px-4 py-2 border-b border-white/5 flex justify-between text-white/40 font-bold uppercase select-none">
                     <span>GIT DIFF WORKSPACE</span>
-                    <span className="text-emerald-450">{integrations.github.lastCommitHash}</span>
+                    <span className={githubMode === "SANDBOX" ? "text-cyan-400" : "text-emerald-450"}>{integrations.github.lastCommitHash}</span>
                   </div>
                   <div className="p-4 space-y-1 max-h-24 overflow-y-auto leading-relaxed select-text">
                     <p className="text-blue-400"># Committed revision outputs:</p>
@@ -354,14 +407,20 @@ export default function IntegrationsDashboard({
                   </div>
                 </div>
               )}
+
+              {githubMode === "SANDBOX" && (
+                <div className="text-[8px] font-mono text-cyan-400/50 uppercase tracking-wider text-center py-1 bg-cyan-500/5 rounded-lg border border-cyan-500/10 select-none">
+                  Running in SANDBOX mode — No real GitHub API calls
+                </div>
+              )}
             </div>
-          ) : integrations.github.connected ? (
+          ) : githubConnected ? (
             <div className="py-10 text-center text-xs text-white/40 italic font-mono uppercase tracking-[0.15em] select-none">
               Active prompt compiled state empty. Prepare templates before tracking revisions.
             </div>
           ) : (
             <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
-              Connection to GitHub not active. Click "Connect" above to commit revisions.
+              Connection to GitHub not active. Click &quot;Connect&quot; above to commit revisions.
             </div>
           )}
         </div>
@@ -402,7 +461,7 @@ export default function IntegrationsDashboard({
                   >
                     <div>
                       <p className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-400 transition-all">{t.name}</p>
-                      <p className="text-[10px] text-white/40 mt-1 uppercase font-mono tracking-wider">Author: {t.author} • DL: {t.downloads}</p>
+                      <p className="text-[10px] text-white/40 mt-1 uppercase font-mono tracking-wider">Author: {t.author} &bull; DL: {t.downloads}</p>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-white/30 group-hover:text-emerald-450 transition-all" />
                   </div>
@@ -411,7 +470,7 @@ export default function IntegrationsDashboard({
             </div>
           ) : (
             <div className="py-10 text-center bg-black/40 rounded-2xl text-xs text-white/35 border border-dashed border-white/10 select-none">
-              Connection to Hugging Face template database not active. Click "Connect" to browse.
+              Connection to Hugging Face template database not active. Click &quot;Connect&quot; to browse.
             </div>
           )}
         </div>

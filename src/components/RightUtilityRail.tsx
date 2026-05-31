@@ -1,6 +1,6 @@
 /**
  * @license
- * SPDX-License-Identifier: Apache-2.5
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import React, { useState } from "react";
@@ -8,7 +8,8 @@ import {
   ShieldAlert, Sparkles, Activity, Clock, Layers, Zap,
   CheckCircle, Flame, Eye, RefreshCw, FileText, ArrowRight,
   Cpu, Github, HelpCircle, ChevronDown, ChevronUp,
-  Gauge, Terminal, LineChart, Sliders, Database, RotateCw, History, Workflow, Bookmark
+  Gauge, Terminal, LineChart, Sliders, Database, RotateCw, History, Workflow, Bookmark,
+  Radar, GitBranch, BarChart3
 } from "lucide-react";
 import { EcosystemIntegrationState, PromptDefinition, PromptSession } from "../types";
 
@@ -47,15 +48,12 @@ export default function RightUtilityRail({
   const efficiencyScore = currentPrompt?.scores?.tokenEfficiency || 91;
   const edgeCasesScore = currentPrompt?.scores?.edgeCases || 89;
 
-  // Hover state for metrics tooltip
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
 
-  // Accordion state
   const [isSubsystemsOpen, setIsSubsystemsOpen] = useState(false);
   const [isGitHubSyncOpen, setIsGitHubSyncOpen] = useState(false);
   const [isAgentDetailsOpen, setIsAgentDetailsOpen] = useState(false);
 
-  // Dynamic tools monitoring status listing derived from actual state
   const cotActive = true;
   const constraintsActive = currentPrompt?.systemInstruction ? "Active" : "None";
   const ragActive = (integrations?.googleDrive?.connected || integrations?.notebookLM?.connected) ? "Synced" : "Offline";
@@ -66,12 +64,6 @@ export default function RightUtilityRail({
     { name: "Constraint Rails", status: constraintsActive, color: currentPrompt?.systemInstruction ? "text-[#6CECC8]" : "text-[#9BAAD4]/40" },
     { name: "Grounding (RAG)", status: ragActive, color: (integrations?.googleDrive?.connected || integrations?.notebookLM?.connected) ? "text-[#79AEFF]" : "text-[#9BAAD4]/40" },
     { name: "Few-Shot Core", status: hasExamples ? "Active" : "No Examples", color: hasExamples ? "text-[#B48FFF]" : "text-[#9BAAD4]/40" }
-  ];
-
-  // Dynamic status timeline log events mapping
-  const UTILITY_LOGS = [
-    { label: "Instruction optimized", time: "Just now", trait: "complete" },
-    { label: "Grounding context synced", time: "10m ago", trait: "success" }
   ];
 
   const tooltipContent: Record<string, { title: string; text: string; breakdown: string }> = {
@@ -97,18 +89,55 @@ export default function RightUtilityRail({
     }
   };
 
+  const githubMode = integrations?.github?.mode;
+  const githubConnected = integrations?.github?.connected;
+
+  const getGitHubRepoDisplay = () => {
+    if (!githubConnected) return "Not configured";
+    if (!integrations.github.repoName) return "Not configured";
+    if (githubMode === "SANDBOX") return integrations.github.repoName;
+    return integrations.github.repoName;
+  };
+
+  const getGitHubBranchDisplay = () => {
+    if (!githubConnected) return "Not connected";
+    if (!integrations.github.branch) return "Awaiting Credentials";
+    return integrations.github.branch;
+  };
+
+  const getGitHubStatusDisplay = () => {
+    if (!githubConnected) return "Not connected";
+    if (integrations.github.syncStatus === "connected") {
+      return githubMode === "REAL" ? "Synchronized" : "Sandbox Active";
+    }
+    return integrations.github.syncStatus || "Not connected";
+  };
+
+  const getGitHubCommitDisplay = () => {
+    if (!githubConnected) return null;
+    if (!integrations.github.lastCommitHash) return null;
+    if (integrations.github.lastCommitHash === "No sync history yet") return null;
+    return integrations.github.lastCommitHash.substring(0, 10);
+  };
+
   return (
     <div className="flex flex-col h-full glass-pane rounded-3xl p-3 select-none justify-between overflow-y-auto shadow-sm relative space-y-3 custom-scrollbar">
       {/* A. Top Summary Strip */}
       <div className="flex items-center justify-between border-b border-white/5 pb-1.5 shrink-0 select-none">
         <span className="text-[10px] font-mono font-black uppercase tracking-wider text-[#EDF2FF]/85 flex items-center gap-1.5 group select-none">
-          <Activity className="h-3.5 w-3.5 text-[#6CECC8] animate-pulse drop-shadow-[0_0_4px_#6CECC8]" /> Agent Monitor
+          <Radar className="h-3.5 w-3.5 text-[#6CECC8] animate-pulse drop-shadow-[0_0_4px_#6CECC8]" /> Agent Monitor
         </span>
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-mono text-[#6CECC8] font-extrabold uppercase bg-[#6CECC8]/10 px-1.5 py-0.5 rounded border border-[#6CECC8]/20 shadow-[0_0_8px_rgba(108,236,200,0.1)]">
             {currentPrompt?.scores?.overall ? `${currentPrompt.scores.overall}% Health` : "Draft State"}
           </span>
-          <span className={`w-1.5 h-1.5 rounded-full ${integrations?.github?.connected ? "bg-emerald-400 shadow-[0_0_6px_#10b981]" : "bg-white/10"}`}></span>
+          <span className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+            githubConnected && githubMode === "REAL" 
+              ? "bg-emerald-400 shadow-[0_0_6px_#10b981]" 
+              : githubConnected 
+                ? "bg-cyan-400/70 shadow-[0_0_4px_rgba(6,182,212,0.3)]" 
+                : "bg-white/10"
+          }`}></span>
         </div>
       </div>
 
@@ -120,9 +149,7 @@ export default function RightUtilityRail({
           </span>
         </div>
 
-        {/* Meter progress metrics */}
         <div className="grid grid-cols-2 gap-1.5 text-[9px] relative">
-          {/* Clarity bar */}
           <div 
             className="space-y-0.5 cursor-help transition-all hover:bg-white/5 p-1 rounded-lg relative border border-transparent hover:border-white/5"
             onMouseEnter={() => setHoveredMetric("clarity")}
@@ -137,7 +164,6 @@ export default function RightUtilityRail({
             </div>
           </div>
 
-          {/* Constraints adhere bar */}
           <div 
             className="space-y-0.5 cursor-help transition-all hover:bg-white/5 p-1 rounded-lg relative border border-transparent hover:border-white/5"
             onMouseEnter={() => setHoveredMetric("constraints")}
@@ -152,7 +178,6 @@ export default function RightUtilityRail({
             </div>
           </div>
 
-          {/* Token foot print index */}
           <div 
             className="space-y-0.5 cursor-help transition-all hover:bg-white/5 p-1 rounded-lg relative border border-transparent hover:border-white/5"
             onMouseEnter={() => setHoveredMetric("efficiency")}
@@ -167,7 +192,6 @@ export default function RightUtilityRail({
             </div>
           </div>
 
-          {/* Edge cases index */}
           <div 
             className="space-y-0.5 cursor-help transition-all hover:bg-white/5 p-1 rounded-lg relative border border-transparent hover:border-white/5"
             onMouseEnter={() => setHoveredMetric("edgeCases")}
@@ -182,7 +206,6 @@ export default function RightUtilityRail({
             </div>
           </div>
 
-          {/* Floating diagnostic metric tooltips overlay */}
           {hoveredMetric && tooltipContent[hoveredMetric] && (
             <div className="absolute left-0 right-0 z-50 p-2.5 bg-[#07101F]/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-md animate-fade-in text-[9px] uppercase leading-tight text-[#9BAAD4] space-y-1 -top-8">
               <div className="flex items-center gap-1.5 text-[#6CECC8] font-black border-b border-white/5 pb-1 tracking-wide font-sans">
@@ -201,7 +224,7 @@ export default function RightUtilityRail({
       {/* C. Benchmarking Core */}
       <div className="space-y-1 pt-1 border-t border-white/5 shrink-0 select-none">
         <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#EDF2FF]/65 flex items-center gap-1.5 hover:text-white transition-all">
-          <Cpu className={`h-3.5 w-3.5 transition-all duration-300 ${preferredModel.includes("2.0") ? "text-[#6CECC8] drop-shadow-[0_0_4px_#6CECC8]" : "text-[#B48FFF] animate-pulse"}`} style={{ animationDuration: "3s" }} /> Benchmark Core
+          <BarChart3 className={`h-3.5 w-3.5 transition-all duration-300 ${preferredModel.includes("2.0") ? "text-[#6CECC8] drop-shadow-[0_0_4px_#6CECC8]" : "text-[#B48FFF]"}`} /> Benchmark Core
         </span>
         <div className="grid grid-cols-3 gap-1 bg-[#040910]/45 p-0.5 rounded-lg border border-white/5">
           {[
@@ -272,16 +295,24 @@ export default function RightUtilityRail({
             className="w-full flex items-center justify-between px-2.5 py-2 hover:bg-white/5 transition-colors cursor-pointer text-left"
           >
             <span className="text-[9px] font-mono font-bold text-[#EDF2FF]/75 uppercase tracking-wide flex items-center gap-1.5 group-hover:text-white transition-colors">
-              <Github className={`h-3.5 w-3.5 transition-all duration-300 ${integrations?.github?.connected ? "text-[#6CECC8] drop-shadow-[0_0_4.px_#6CECC8]" : "text-white/40"}`} /> GitHub Sync
+              <GitBranch className={`h-3.5 w-3.5 transition-all duration-300 ${
+                githubConnected && githubMode === "REAL" 
+                  ? "text-[#6CECC8] drop-shadow-[0_0_4px_#6CECC8]" 
+                  : githubConnected 
+                    ? "text-cyan-400/80" 
+                    : "text-white/40"
+              }`} /> GitHub Sync
             </span>
             <div className="flex items-center gap-2">
               <span className={`text-[7.5px] font-mono px-1 py-0.5 rounded uppercase font-semibold transition-all duration-300 border ${
-                integrations?.github?.connected 
-                  ? (integrations.github.mode === "REAL" ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25 shadow-[0_0_8px_rgba(16,185,129,0.15)]" : "bg-cyan-500/10 text-cyan-300 border-cyan-500/25 shadow-[0_0_8px_rgba(6,182,212,0.15)]")
+                githubConnected 
+                  ? (githubMode === "REAL" 
+                      ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25 shadow-[0_0_8px_rgba(16,185,129,0.15)]" 
+                      : "bg-cyan-500/10 text-cyan-300 border-cyan-500/25 shadow-[0_0_8px_rgba(6,182,212,0.15)]")
                   : "bg-white/5 text-white/40 border-transparent"
               }`}>
-                {integrations?.github?.connected 
-                  ? (integrations.github.mode === "REAL" ? "CONNECTED" : "SANDBOX/MOCKED") 
+                {githubConnected 
+                  ? (githubMode === "REAL" ? "CONNECTED" : "SANDBOX/MOCKED") 
                   : "Not connected"}
               </span>
               {isGitHubSyncOpen ? (
@@ -294,26 +325,42 @@ export default function RightUtilityRail({
           
           {isGitHubSyncOpen && (
             <div className="px-2 pb-2.5 pt-0.5 space-y-1.5 animate-fade-in font-mono text-[8px] leading-tight text-[#9BAAD4]">
-              {integrations?.github?.connected ? (
+              {githubConnected ? (
                 <div className="space-y-1">
                   <div className="flex justify-between items-center bg-[#040910]/45 px-2 py-1 rounded border border-white/5">
                     <span className="text-white/30 uppercase text-[7.5px]">Repo</span>
-                    <span className="text-emerald-400 truncate max-w-[110px] font-bold">{integrations.github.repoName || "Not configured"}</span>
+                    <span className={`truncate max-w-[110px] font-bold ${githubMode === "SANDBOX" ? "text-cyan-400" : "text-emerald-400"}`}>
+                      {getGitHubRepoDisplay()}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center bg-[#040910]/45 px-2 py-1 rounded border border-white/5">
                     <span className="text-white/30 uppercase text-[7.5px]">Branch</span>
-                    <span className="text-white font-semibold">{integrations.github.branch || "Awaiting Credentials"}</span>
+                    <span className="text-white font-semibold">{getGitHubBranchDisplay()}</span>
                   </div>
-                  {integrations.github.lastCommitHash && (
+                  {getGitHubCommitDisplay() && (
                     <div className="flex justify-between items-center bg-[#040910]/45 px-2 py-1 rounded border border-white/5">
                       <span className="text-white/30 uppercase text-[7.5px]">Commit</span>
-                      <span className="text-[#bfdbfe] font-bold">{integrations.github.lastCommitHash.substring(0, 10)}</span>
+                      <span className="text-[#bfdbfe] font-bold">{getGitHubCommitDisplay()}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center bg-[#040910]/45 px-2 py-1 rounded border border-white/5">
                     <span className="text-white/30 uppercase text-[7.5px]">Status</span>
-                    <span className="text-[#6CECC8] font-bold">Synchronized</span>
+                    <span className={`font-bold ${githubMode === "SANDBOX" ? "text-cyan-400" : "text-[#6CECC8]"}`}>
+                      {getGitHubStatusDisplay()}
+                    </span>
                   </div>
+                  {githubMode === "SANDBOX" && (
+                    <div className="flex justify-between items-center bg-cyan-500/5 px-2 py-1 rounded border border-cyan-500/15">
+                      <span className="text-cyan-400/60 uppercase text-[7px] font-bold tracking-wider">Mode</span>
+                      <span className="text-cyan-300 font-bold text-[7px]">SANDBOX</span>
+                    </div>
+                  )}
+                  {integrations.github.syncTime && (
+                    <div className="flex justify-between items-center bg-[#040910]/45 px-2 py-1 rounded border border-white/5">
+                      <span className="text-white/30 uppercase text-[7.5px]">Last Sync</span>
+                      <span className="text-white/50 font-semibold">{new Date(integrations.github.syncTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  )}
                   {onOpenSettings && (
                     <button
                       onClick={onOpenSettings}
@@ -404,7 +451,6 @@ export default function RightUtilityRail({
           </button>
         </div>
 
-        {/* Ultra compact timeline logs */}
         <div className="flex justify-between pt-1 text-[8.5px] text-[#9BAAD4]/30 font-mono scale-95 origin-left select-none">
           <span>{activeSession?.updatedAt ? `Synced: ${new Date(activeSession.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : "Sandbox Ready"}</span>
           <span>{currentPrompt ? "Logs: Audited" : "Draft Mode"}</span>
