@@ -154,14 +154,18 @@ export default function SettingsModal({
     } else if (key === "github") {
       next.github.connected = !next.github.connected;
       if (next.github.connected) {
-        next.github.repoName = "ai-studio-prompt-templates";
-        next.github.branch = gitBranch;
+        next.github.repoName = next.github.repoName || "Not configured";
+        next.github.branch = next.github.branch || "Awaiting Credentials";
         setGithubAuthStep("connected");
-        setGithubCommitLog(["Initialized structural repo", "Linked main branch refs info"]);
+        next.github.mode = next.github.mode || "SANDBOX";
+        setGithubCommitLog(["Sandbox connection initialized", "Awaiting repository configuration"]);
       } else {
         next.github.repoName = undefined;
         next.github.branch = undefined;
         next.github.lastCommitHash = undefined;
+        next.github.syncTime = undefined;
+        next.github.syncStatus = undefined;
+        next.github.mode = undefined;
         setGithubAuthStep("idle");
         setGithubCommitLog([]);
       }
