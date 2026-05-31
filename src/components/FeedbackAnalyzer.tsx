@@ -42,9 +42,9 @@ export default function FeedbackAnalyzer({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 font-sans lg:h-full lg:max-h-full min-h-0">
       {/* Input Form console */}
-      <div className="col-span-1 lg:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-sm space-y-3 lg:h-full lg:max-h-full flex flex-col min-h-0">
-        <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 select-none shrink-0">
-          <LifeBuoy className="h-4.5 w-4.5 text-[#6CECC8]" />
+      <div className="col-span-1 lg:col-span-2 rounded-3xl border border-glass bg-white/5 p-5 shadow-sm space-y-3 lg:h-full lg:max-h-full flex flex-col min-h-0">
+        <div className="flex items-center gap-2 border-b border-glass pb-2.5 select-none shrink-0">
+          <LifeBuoy className="h-4.5 w-4.5 text-accent-mint" />
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">AI Studio Feedback Debugger</h4>
             <p className="text-[9px] font-mono text-white/45 uppercase tracking-widest leading-none mt-0.5">Auto diagnose & patch prompt bugs</p>
@@ -53,13 +53,13 @@ export default function FeedbackAnalyzer({
 
         <form onSubmit={handleRunAnalysis} className="space-y-3 text-xs flex-1 flex flex-col min-h-0 justify-between">
           <div className="space-y-1 flex-1 flex flex-col min-h-0">
-            <div className="flex justify-between items-center text-[9px] font-mono uppercase text-[#9BAAD4]/50 tracking-widest select-none shrink-0">
+            <div className="flex justify-between items-center text-[9px] font-mono uppercase text-brand-muted/50 tracking-widest select-none shrink-0">
               <label>Original System Instruction</label>
               {prompt && (
                 <button
                   type="button"
                   onClick={loadCurrentPromptIntoInputs}
-                  className="text-[#6CECC8] hover:text-[#6CECC8]/80 font-extrabold cursor-pointer"
+                  className="text-accent-mint hover:text-accent-mint/80 font-extrabold cursor-pointer"
                 >
                   Load Active Prompt
                 </button>
@@ -69,30 +69,30 @@ export default function FeedbackAnalyzer({
               value={originalPromptText}
               onChange={(e) => setOriginalPromptText(e.target.value)}
               placeholder="Paste original AI Studio instruction here (or leave blank to use active prompt)..."
-              className="w-full text-[11px] rounded-xl border border-white/10 px-3 py-2 font-mono bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-semibold min-h-0 flex-1 resize-none focus:border-[#6CECC8]/30 focus:outline-none"
+              className="w-full text-[11px] rounded-xl border border-glass px-3 py-2 font-mono bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-semibold min-h-0 flex-1 resize-none focus:border-accent-mint/30 focus:outline-none"
             />
           </div>
 
           <div className="space-y-1 flex-1 flex flex-col min-h-0">
-            <label className="text-[9px] font-mono uppercase text-[#9BAAD4]/50 tracking-widest block select-none shrink-0">Pasted Defective Output (AI Studio Response)</label>
+            <label className="text-[9px] font-mono uppercase text-brand-muted/50 tracking-widest block select-none shrink-0">Pasted Defective Output (AI Studio Response)</label>
             <textarea
               required
               value={badOutputText}
               onChange={(e) => setBadOutputText(e.target.value)}
               placeholder="Paste the bad, bloated, or buggy response the model returned here..."
-              className="w-full text-[11px] rounded-xl border border-white/10 px-3 py-2 font-mono text-red-400 bg-red-500/5 focus:outline-none min-h-0 flex-1 resize-none focus:border-red-500/20"
+              className="w-full text-[11px] rounded-xl border border-glass px-3 py-2 font-mono text-red-400 bg-red-500/5 focus:outline-none min-h-0 flex-1 resize-none focus:border-red-500/20"
             />
           </div>
 
           <div className="space-y-1 shrink-0">
-            <label className="text-[9px] font-mono uppercase text-[#9BAAD4]/50 tracking-widest block select-none">Correct Target Expectation / Criteria</label>
+            <label className="text-[9px] font-mono uppercase text-brand-muted/50 tracking-widest block select-none">Correct Target Expectation / Criteria</label>
             <input
               type="text"
               required
               value={expectationText}
               onChange={(e) => setExpectationText(e.target.value)}
               placeholder="e.g. Needs to output bullet points, of max 20 words, or strictly in JSON format"
-              className="w-full text-[11px] rounded-xl border border-white/10 px-3 py-2 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-semibold focus:border-[#6CECC8]/30 focus:outline-none"
+              className="w-full text-[11px] rounded-xl border border-glass px-3 py-2 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-semibold focus:border-accent-mint/30 focus:outline-none"
             />
           </div>
 
@@ -109,10 +109,10 @@ export default function FeedbackAnalyzer({
 
       {/* Reports output panel */}
       <div className="col-span-1 lg:col-span-3 lg:h-full lg:max-h-full flex flex-col min-h-0">
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-sm lg:h-full lg:max-h-full flex flex-col justify-between min-h-0 overflow-hidden">
+        <div className="rounded-3xl border border-glass bg-white/5 p-5 shadow-sm lg:h-full lg:max-h-full flex flex-col justify-between min-h-0 overflow-hidden">
           <div className="flex-1 flex flex-col min-h-0 space-y-3">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 select-none shrink-0">
-              <ShieldCheck className="h-4.5 w-4.5 text-[#6CECC8]" />
+            <div className="flex items-center gap-2 border-b border-glass pb-2.5 select-none shrink-0">
+              <ShieldCheck className="h-4.5 w-4.5 text-accent-mint" />
               <div>
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">Diagnostic Analysis & Security Re-Writes</h4>
                 <p className="text-[9px] font-mono text-white/45 uppercase tracking-widest leading-none mt-0.5">Strategic prompt correction readouts</p>
@@ -150,7 +150,7 @@ export default function FeedbackAnalyzer({
                     </div>
 
                     {/* Root cause */}
-                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 text-xs space-y-1.5 leading-relaxed">
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-glass text-xs space-y-1.5 leading-relaxed">
                       <span className="font-bold uppercase text-white/40 font-mono text-[9px] tracking-wider block">Instruction Flaw Root Cause</span>
                       <p className="text-white/80 leading-relaxed font-semibold text-[11px]">{analysisResult.rootCause}</p>
                     </div>
@@ -172,7 +172,7 @@ export default function FeedbackAnalyzer({
                   {/* Mini Diff display */}
                   <div className="space-y-1 select-none">
                     <span className="font-mono font-bold uppercase text-white/30 text-[9px] tracking-widest block">Strategic Prompt Rewriting</span>
-                    <div className="p-3 rounded-lg bg-black text-emerald-400 font-mono text-[11px] h-20 overflow-y-auto border border-white/5 leading-relaxed select-all">
+                    <div className="p-3 rounded-lg bg-black text-emerald-400 font-mono text-[11px] h-20 overflow-y-auto border border-glass leading-relaxed select-all">
                       {analysisResult.patchedPrompt.systemInstruction}
                     </div>
                   </div>

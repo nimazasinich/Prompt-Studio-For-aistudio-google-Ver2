@@ -11,6 +11,8 @@ import {
   Activity, Lock
 } from "lucide-react";
 import { EcosystemIntegrationState, PromptDefinition } from "../types";
+import { AppTheme } from "../theme";
+import { Moon, Sun } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -22,6 +24,8 @@ interface SettingsModalProps {
   onHuggingFaceTemplatePicked: (promptTemplate: any) => void;
   uiScale: "compact" | "comfortable" | "spacious";
   onChangeUiScale: (scale: "compact" | "comfortable" | "spacious") => void;
+  appTheme: AppTheme;
+  onChangeTheme: (theme: AppTheme) => void;
   preferredModel: string;
   onChangePreferredModel: (model: string) => void;
 }
@@ -36,6 +40,8 @@ export default function SettingsModal({
   onHuggingFaceTemplatePicked,
   uiScale,
   onChangeUiScale,
+  appTheme,
+  onChangeTheme,
   preferredModel,
   onChangePreferredModel
 }: SettingsModalProps) {
@@ -223,23 +229,23 @@ export default function SettingsModal({
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#040910]/85 backdrop-blur-md animate-fade-in p-4 select-none">
-      <div className="relative w-full max-w-4xl h-[72vh] rounded-3xl bg-[#07101F] border border-white/10 shadow-[0_24px_50px_rgba(0,0,0,0.6)] flex overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center theme-overlay backdrop-blur-md animate-fade-in p-4 select-none">
+      <div className="relative w-full max-w-4xl h-[72vh] rounded-3xl theme-modal border border-glass shadow-[0_24px_50px_rgba(0,0,0,0.25)] flex overflow-hidden">
         
         {/* Absolute header-right close button */}
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 rounded-full p-1.5 text-[#9BAAD4]/60 hover:bg-white/5 hover:text-white transition-all border border-white/5 cursor-pointer z-10"
+          className="absolute right-5 top-5 rounded-full p-1.5 text-brand-muted/60 hover:bg-white/5 hover:text-white transition-all border border-glass cursor-pointer z-10"
         >
           <X className="h-4 w-4" />
         </button>
 
         {/* Left Sidebar Tab Selector with compact header text */}
-        <div className="w-[190px] md:w-[220px] bg-[#040910]/70 border-r border-white/5 flex flex-col p-4 shrink-0 select-none overflow-y-auto">
-          <div className="flex items-center gap-2 px-1.5 py-4 border-b border-white/5 mb-3">
-            <Settings className="h-4 w-4 text-[#6CECC8] animate-spin" style={{ animationDuration: "16s" }} />
+        <div className="w-[190px] md:w-[220px] bg-brand-deep/70 border-r border-glass flex flex-col p-4 shrink-0 select-none overflow-y-auto">
+          <div className="flex items-center gap-2 px-1.5 py-4 border-b border-glass mb-3">
+            <Settings className="h-4 w-4 text-accent-mint animate-spin" style={{ animationDuration: "16s" }} />
             <div>
-              <span className="text-[10px] font-space font-black tracking-widest text-[#EDF2FF] uppercase leading-none block">
+              <span className="text-[10px] font-space font-black tracking-widest text-brand-primary uppercase leading-none block">
                 Preferences
               </span>
               <span className="text-[8px] tracking-[0.2em] font-mono text-white/30 uppercase mt-0.5 block leading-none">
@@ -258,32 +264,32 @@ export default function SettingsModal({
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`w-full text-left flex items-start gap-2.5 rounded-xl border p-2.5 transition-all cursor-pointer ${
                     isActive
-                      ? "bg-[#07101F]/90 text-[#6CECC8] border-white/5 shadow-inner"
-                      : "text-[#9BAAD4]/50 border-transparent hover:bg-white/5 hover:text-[#EDF2FF]"
+                      ? "bg-brand-secondary/90 text-accent-mint border-glass shadow-inner"
+                      : "text-brand-muted/50 border-transparent hover:bg-white/5 hover:text-brand-primary"
                   }`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${isActive ? "text-[#6CECC8]" : "text-[#9BAAD4]/40"}`} />
+                  <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${isActive ? "text-accent-mint" : "text-brand-muted/40"}`} />
                   <div>
                     <h6 className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? "text-white" : ""}`}>{tab.label}</h6>
-                    <p className="text-[8px] text-[#9BAAD4]/40 mt-0.5 leading-tight">{tab.desc}</p>
+                    <p className="text-[8px] text-brand-muted/40 mt-0.5 leading-tight">{tab.desc}</p>
                   </div>
                 </button>
               );
             })}
           </div>
           
-          <div className="pt-3 border-t border-white/5 text-center">
-            <span className="text-[7.5px] font-mono text-white/20 uppercase tracking-widest inline-block">SYSTEM HOST: v1.4.1</span>
+          <div className="pt-3 border-t border-glass text-center">
+            <span className="text-[7.5px] font-mono text-brand-muted/40 uppercase tracking-widest inline-block">SYSTEM HOST: v1.4.1</span>
           </div>
         </div>
 
         {/* Right Content Pane - unified scroll boundaries */}
-        <div className="flex-1 bg-[#07101F]/40 p-6 overflow-y-auto custom-scrollbar flex flex-col min-h-0 text-white select-text">
-          <div className="mb-4 pb-2 border-b border-white/5 shrink-0 select-none">
-            <span className="text-[9px] font-mono font-black text-[#B48FFF] uppercase tracking-[0.2em] bg-[#B48FFF]/10 border border-[#B48FFF]/15 px-2 py-0.5 rounded leading-none inline-block mb-1.5">
+        <div className="flex-1 bg-brand-secondary/40 p-6 overflow-y-auto custom-scrollbar flex flex-col min-h-0 text-brand-primary select-text">
+          <div className="mb-4 pb-2 border-b border-glass shrink-0 select-none">
+            <span className="text-[9px] font-mono font-black text-accent-violet uppercase tracking-[0.2em] bg-accent-violet/10 border border-accent-violet/15 px-2 py-0.5 rounded leading-none inline-block mb-1.5">
               Refined Panel
             </span>
-            <h3 className="text-xs font-space font-extrabold uppercase tracking-widest text-[#EDF2FF] flex items-center gap-1.5">
+            <h3 className="text-xs font-space font-extrabold uppercase tracking-widest text-brand-primary flex items-center gap-1.5">
               {activeTab === "preferences" && "System & UI Scale Settings"}
               {activeTab === "modelCores" && "Active Model Routing Config"}
               {activeTab === "safetyAnalytics" && "Rules Engine & Compliance Core"}
@@ -295,21 +301,21 @@ export default function SettingsModal({
           <div className="flex-1 min-h-0">
             {/* 1. PREFERENCES */}
             {activeTab === "preferences" && (
-              <div className="space-y-5 animate-fade-in text-[11px] leading-relaxed text-[#9BAAD4]/80">
+              <div className="space-y-5 animate-fade-in text-[11px] leading-relaxed text-brand-muted/80">
                 <p>Configure primary environment identifiers and default workspace density scales.</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono font-bold tracking-wider text-[#EDF2FF]/60 uppercase">Workspace ID Prefix</label>
+                    <label className="text-[9px] font-mono font-bold tracking-wider text-brand-primary/60 uppercase">Workspace ID Prefix</label>
                     <input
                       type="text"
                       defaultValue="prompt_workspace_local"
-                      className="w-full rounded-xl focus:outline-none px-3.5 py-2.5 bg-[#040910]/60 border border-white/5 text-[#EDF2FF] uppercase tracking-wide font-mono text-[10px]"
+                      className="w-full rounded-xl focus:outline-none px-3.5 py-2.5 bg-brand-deep/60 border border-glass text-brand-primary uppercase tracking-wide font-mono text-[10px]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono font-bold tracking-wider text-[#EDF2FF]/60 uppercase">System Prompt Instructions Tone</label>
-                    <select className="w-full rounded-xl focus:outline-none px-3.5 py-2 bg-[#040910]/60 border border-white/5 text-[#EDF2FF] uppercase tracking-wide font-semibold text-[10px] h-[37px] cursor-pointer">
+                    <label className="text-[9px] font-mono font-bold tracking-wider text-brand-primary/60 uppercase">System Prompt Instructions Tone</label>
+                    <select className="w-full rounded-xl focus:outline-none px-3.5 py-2 bg-brand-deep/60 border border-glass text-brand-primary uppercase tracking-wide font-semibold text-[10px] h-[37px] cursor-pointer">
                       <option>Extremely Rigid / Academic</option>
                       <option>Slightly Editorial / Creative</option>
                       <option>Standard Assistant Default</option>
@@ -318,7 +324,37 @@ export default function SettingsModal({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] font-mono font-bold tracking-wider text-[#EDF2FF]/60 uppercase block">
+                  <label className="text-[9px] font-mono font-bold tracking-wider text-brand-primary/60 uppercase block">
+                    Interface Appearance
+                  </label>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {([
+                      { id: "dark" as const, label: "Dark AI Studio Glass", desc: "Deep glass workspace", icon: Moon },
+                      { id: "light" as const, label: "Light AI Studio Glass", desc: "Bright premium dashboard", icon: Sun },
+                    ]).map((th) => {
+                      const isSelected = appTheme === th.id;
+                      const Icon = th.icon;
+                      return (
+                        <div
+                          key={th.id}
+                          onClick={() => onChangeTheme(th.id)}
+                          className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col gap-2 ${
+                            isSelected
+                              ? "bg-accent-mint/10 border-accent-mint/40 text-brand-primary"
+                              : "bg-brand-deep/45 border-transparent text-brand-muted/50 hover:bg-brand-deep hover:text-brand-primary"
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 ${isSelected ? "text-accent-mint" : "text-brand-muted/40"}`} />
+                          <span className="font-bold text-[10px] uppercase tracking-wider">{th.label}</span>
+                          <span className="text-[8.5px] opacity-60 font-mono uppercase leading-none">{th.desc}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] font-mono font-bold tracking-wider text-brand-primary/60 uppercase block">
                     Visual UI Scale Density
                   </label>
                   <div className="grid grid-cols-3 gap-2.5">
@@ -334,8 +370,8 @@ export default function SettingsModal({
                           onClick={() => onChangeUiScale(sc.id as any)}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                             isSelected
-                              ? "bg-[#6CECC8]/10 border-[#6CECC8]/40 text-[#EDF2FF]"
-                              : "bg-[#040910]/45 border-transparent text-[#9BAAD4]/50 hover:bg-[#040910] hover:text-[#EDF2FF]"
+                              ? "bg-accent-mint/10 border-accent-mint/40 text-brand-primary"
+                              : "bg-brand-deep/45 border-transparent text-brand-muted/50 hover:bg-brand-deep hover:text-brand-primary"
                           }`}
                         >
                           <span className="font-bold text-[10px] uppercase tracking-wider">{sc.label}</span>
@@ -347,34 +383,34 @@ export default function SettingsModal({
                 </div>
 
                 {/* Compact accordion for font descriptions */}
-                <div className="rounded-xl border border-white/5 bg-[#040910]/30 overflow-hidden">
+                <div className="rounded-xl border border-glass bg-brand-deep/30 overflow-hidden">
                   <button 
                     onClick={() => toggleAccordion("fonts")}
-                    className="w-full px-4 py-2.5 flex items-center justify-between text-[10px] font-bold text-[#EDF2FF]/70 uppercase tracking-wider hover:bg-[#040910]/50"
+                    className="w-full px-4 py-2.5 flex items-center justify-between text-[10px] font-bold text-brand-primary/70 uppercase tracking-wider hover:bg-brand-deep/50"
                   >
                     <span>View Imbedded Font Families</span>
                     <span className="text-[10px] font-mono">{openAccordion === "fonts" ? "[-]" : "[+]"}</span>
                   </button>
                   {openAccordion === "fonts" && (
-                    <div className="p-4 border-t border-white/5 space-y-2 font-mono text-[9px] text-[#9BAAD4]/75 uppercase bg-[#040910]/60">
+                    <div className="p-4 border-t border-glass space-y-2 font-mono text-[9px] text-brand-muted/75 uppercase bg-brand-deep/60">
                       <div className="flex justify-between items-center pb-1 border-b border-white/[0.03]">
                         <span>Space Grotesk</span>
-                        <span className="text-[#6CECC8]">Titles & Hero Headers</span>
+                        <span className="text-accent-mint">Titles & Hero Headers</span>
                       </div>
                       <div className="flex justify-between items-center pb-1 border-b border-white/[0.03]">
                         <span>Inter</span>
-                        <span className="text-[#6CECC8]">Buttons & Workspace Forms</span>
+                        <span className="text-accent-mint">Buttons & Workspace Forms</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span>JetBrains Mono</span>
-                        <span className="text-[#6CECC8]">Strict variables & metrics compile logs</span>
+                        <span className="text-accent-mint">Strict variables & metrics compile logs</span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#040910]/40 border border-white/5 space-y-1.5">
-                  <span className="text-[8.5px] font-mono font-bold text-[#B48FFF] uppercase block">Platform State Status</span>
+                <div className="p-3.5 rounded-2xl bg-brand-deep/40 border border-glass space-y-1.5">
+                  <span className="text-[8.5px] font-mono font-bold text-accent-violet uppercase block">Platform State Status</span>
                   <p className="text-[9.5px] leading-relaxed uppercase font-mono text-white/50">
                     Session state persists locally. Connect credentials in the Secrets panel for cloud synchronization.
                   </p>
@@ -384,7 +420,7 @@ export default function SettingsModal({
 
             {/* 2. MODELS */}
             {activeTab === "modelCores" && (
-              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-[#9BAAD4]/80">
+              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-brand-muted/80">
                 <p>Choose corresponding primary model routes for prompt generation, evaluations and synthetic scenarios iterations.</p>
                 
                 <div className="space-y-2">
@@ -400,19 +436,19 @@ export default function SettingsModal({
                         onClick={() => onChangePreferredModel(m.id)}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                           isSelected
-                            ? "bg-[#6CECC8]/10 border-[#6CECC8]/35 text-[#EDF2FF]"
-                            : "bg-[#040910]/45 border-transparent text-[#9BAAD4]/65 hover:bg-[#040910]"
+                            ? "bg-accent-mint/10 border-accent-mint/35 text-brand-primary"
+                            : "bg-brand-deep/45 border-transparent text-brand-muted/65 hover:bg-brand-deep"
                         }`}
                       >
                         <input
                           type="radio"
                           checked={isSelected}
                           onChange={() => {}}
-                          className="mt-1 accent-[#6CECC8]"
+                          className="mt-1 accent-accent-mint"
                         />
                         <div>
                           <p className="font-bold text-[10px] uppercase tracking-wide">{m.name}</p>
-                          <p className="text-[8.5px] text-[#9BAAD4]/40 mt-1 uppercase font-mono">{m.desc}</p>
+                          <p className="text-[8.5px] text-brand-muted/40 mt-1 uppercase font-mono">{m.desc}</p>
                         </div>
                       </div>
                     );
@@ -420,18 +456,18 @@ export default function SettingsModal({
                 </div>
 
                 {/* Experimental Flags Grouped here elegantly */}
-                <div className="p-4 rounded-xl bg-[#040910]/60 border border-white/5 space-y-3 mt-4">
+                <div className="p-4 rounded-xl bg-brand-deep/60 border border-glass space-y-3 mt-4">
                   <span className="text-[8.5px] font-mono font-bold text-amber-400 uppercase tracking-widest block leading-none">Self-Refinement Synthetic Loops Panel</span>
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="font-bold text-[#EDF2FF] uppercase tracking-wide text-[10px] flex items-center gap-1">
-                        <Sparkles className="h-3.5 w-3.5 text-[#6CECC8]" /> Self-Correcting synthetic VM
+                      <span className="font-bold text-brand-primary uppercase tracking-wide text-[10px] flex items-center gap-1">
+                        <Sparkles className="h-3.5 w-3.5 text-accent-mint" /> Self-Correcting synthetic VM
                       </span>
-                      <p className="text-[8.5px] text-[#9BAAD4]/40 uppercase mt-0.5">
+                      <p className="text-[8.5px] text-brand-muted/40 uppercase mt-0.5">
                         Trigger mock code correction loops when metrics drop below 75% thresholds
                       </p>
                     </div>
-                    <input type="checkbox" defaultChecked className="accent-[#6CECC8] h-4 w-4 shrink-0 cursor-pointer" />
+                    <input type="checkbox" defaultChecked className="accent-accent-mint h-4 w-4 shrink-0 cursor-pointer" />
                   </div>
                 </div>
               </div>
@@ -439,37 +475,37 @@ export default function SettingsModal({
 
             {/* 3. SAFETY & ANALYTICS */}
             {activeTab === "safetyAnalytics" && (
-              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-[#9BAAD4]/80">
+              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-brand-muted/80">
                 <p>Fine-tune security verification criteria, system constraints, COT requirements, and view diagnostic statistics.</p>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2 p-3.5 rounded-2xl bg-[#040910]/60 border border-white/5">
+                  <div className="space-y-2 p-3.5 rounded-2xl bg-brand-deep/60 border border-glass">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#EDF2FF] uppercase tracking-wide text-[9.5px]">Chain-of-Thought Core</span>
-                      <input type="checkbox" defaultChecked className="accent-[#6CECC8] h-3.5 w-3.5 cursor-pointer" />
+                      <span className="font-bold text-brand-primary uppercase tracking-wide text-[9.5px]">Chain-of-Thought Core</span>
+                      <input type="checkbox" defaultChecked className="accent-accent-mint h-3.5 w-3.5 cursor-pointer" />
                     </div>
-                    <p className="text-[8px] text-[#9BAAD4]/40 uppercase">Enforce structured thinking blocks ahead of prompt answers</p>
+                    <p className="text-[8px] text-brand-muted/40 uppercase">Enforce structured thinking blocks ahead of prompt answers</p>
                   </div>
 
-                  <div className="space-y-2 p-3.5 rounded-2xl bg-[#040910]/60 border border-white/5">
+                  <div className="space-y-2 p-3.5 rounded-2xl bg-brand-deep/60 border border-glass">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#EDF2FF] uppercase tracking-wide text-[9.5px]">Strict Safety Shields</span>
-                      <input type="checkbox" defaultChecked className="accent-[#6CECC8] h-3.5 w-3.5 cursor-pointer" />
+                      <span className="font-bold text-brand-primary uppercase tracking-wide text-[9.5px]">Strict Safety Shields</span>
+                      <input type="checkbox" defaultChecked className="accent-accent-mint h-3.5 w-3.5 cursor-pointer" />
                     </div>
-                    <p className="text-[8px] text-[#9BAAD4]/40 uppercase">Auto filters instructions matching PII & Google core safety blocks</p>
+                    <p className="text-[8px] text-brand-muted/40 uppercase">Auto filters instructions matching PII & Google core safety blocks</p>
                   </div>
                 </div>
 
-                <div className="bg-[#040910]/30 rounded-xl overflow-hidden border border-white/5">
+                <div className="bg-brand-deep/30 rounded-xl overflow-hidden border border-glass">
                   <button 
                     onClick={() => toggleAccordion("latency")}
-                    className="w-full px-4 py-2.5 flex items-center justify-between text-[10px] font-bold text-[#EDF2FF]/70 uppercase tracking-wider hover:bg-[#040910]/50"
+                    className="w-full px-4 py-2.5 flex items-center justify-between text-[10px] font-bold text-brand-primary/70 uppercase tracking-wider hover:bg-brand-deep/50"
                   >
                     <span>Inspect Platform Compiler Latency Metrics</span>
                     <span className="text-[10px] font-mono">{openAccordion === "latency" ? "[-]" : "[+]"}</span>
                   </button>
                   {openAccordion === "latency" && (
-                    <div className="p-4 border-t border-white/5 grid grid-cols-4 gap-2 text-center bg-[#040910]/60">
+                    <div className="p-4 border-t border-glass grid grid-cols-4 gap-2 text-center bg-brand-deep/60">
                       {[
                         { label: "Compiler Latency", val: "—" },
                         { label: "QA Checks Pass", val: "—" },
@@ -477,8 +513,8 @@ export default function SettingsModal({
                         { label: "Runs Logged", val: "—" }
                       ].map((an) => (
                         <div key={an.label} className="p-2 border border-white/[0.03] bg-black/30 rounded-lg">
-                          <span className="text-[7.5px] font-mono text-[#9BAAD4]/40 uppercase block truncate">{an.label}</span>
-                          <span className="text-[11px] font-bold font-mono text-[#6CECC8] mt-1 block leading-none">{an.val}</span>
+                          <span className="text-[7.5px] font-mono text-brand-muted/40 uppercase block truncate">{an.label}</span>
+                          <span className="text-[11px] font-bold font-mono text-accent-mint mt-1 block leading-none">{an.val}</span>
                         </div>
                       ))}
                     </div>
@@ -499,23 +535,23 @@ export default function SettingsModal({
 
             {/* 4. CLOUD GROUNDING */}
             {activeTab === "cloudDrive" && (
-              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-[#9BAAD4]/85">
+              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-brand-muted/85">
                 <p>Authorize cloud storage and import corporate compliance documentation directly for evaluation and context injection.</p>
 
                 {/* Google Drive Connector */}
-                <div className="p-4 rounded-xl bg-[#040910]/60 border border-white/5">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-white/5 mb-3.5">
+                <div className="p-4 rounded-xl bg-brand-deep/60 border border-glass">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-glass mb-3.5">
                     <div className="flex items-center gap-2">
-                      <Cloud className="h-4.5 w-4.5 text-[#6CECC8]" />
+                      <Cloud className="h-4.5 w-4.5 text-accent-mint" />
                       <div>
                         <span className="text-[10px] font-bold text-white uppercase tracking-wide">Google Drive Sync</span>
                         <p className="text-[8px] text-white/40 uppercase font-mono leading-none mt-0.5">Synchronize raw compliance policies</p>
                       </div>
                     </div>
                     {integrations.googleDrive.connected ? (
-                      <span className="px-2 py-0.5 text-[8px] font-mono leading-none bg-[#6CECC8]/10 text-[#6CECC8] border border-[#6CECC8]/25 rounded-md font-bold uppercase tracking-wider">Connected</span>
+                      <span className="px-2 py-0.5 text-[8px] font-mono leading-none bg-accent-mint/10 text-accent-mint border border-accent-mint/25 rounded-md font-bold uppercase tracking-wider">Connected</span>
                     ) : (
-                      <span className="px-2 py-0.5 text-[8px] font-mono leading-none bg-white/5 text-white/40 border border-white/5 rounded-md font-bold uppercase tracking-wider">Unlinked</span>
+                      <span className="px-2 py-0.5 text-[8px] font-mono leading-none bg-white/5 text-white/40 border border-glass rounded-md font-bold uppercase tracking-wider">Unlinked</span>
                     )}
                   </div>
 
@@ -524,7 +560,7 @@ export default function SettingsModal({
                       <span className="text-white/30 uppercase">Initiate secure Google Auth scope authorization flow</span>
                       <button
                         onClick={() => setDriveAuthStep("oauth_consent")}
-                        className="bg-[#B48FFF] text-black font-black uppercase text-[8px] tracking-widest px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white transition-all font-space"
+                        className="bg-accent-violet text-black font-black uppercase text-[8px] tracking-widest px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white transition-all font-space"
                       >
                         Authorize portal
                       </button>
@@ -566,7 +602,7 @@ export default function SettingsModal({
 
                   {driveAuthStep === "connected" && (
                     <div className="space-y-3">
-                      <div className="bg-emerald-500/5 border border-emerald-500/20 text-[#6CECC8] p-2.5 rounded-lg text-[9px] font-mono flex items-center justify-between">
+                      <div className="bg-emerald-500/5 border border-emerald-500/20 text-accent-mint p-2.5 rounded-lg text-[9px] font-mono flex items-center justify-between">
                         <span>Status: <strong className="text-white">Drive Linked (Sandbox)</strong></span>
                         <button 
                           onClick={() => {
@@ -592,16 +628,16 @@ export default function SettingsModal({
                               key={f.id}
                               onClick={() => handleLinkDriveFile(f.id)}
                               className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
-                                isLinked ? "bg-[#6CECC8]/10 border-[#6CECC8]/30" : "bg-[#040910] border-white/5 hover:bg-[#07101F]"
+                                isLinked ? "bg-accent-mint/10 border-accent-mint/30" : "bg-brand-deep border-glass hover:bg-brand-secondary"
                               }`}
                             >
-                              <div className="flex items-center gap-2 font-bold truncate text-[10px] text-[#EDF2FF]">
-                                <FileText className="h-3.5 w-3.5 text-[#9BAAD4]/60" />
-                                <span className={isLinked ? "text-[#6CECC8]" : ""}>{f.name}</span>
+                              <div className="flex items-center gap-2 font-bold truncate text-[10px] text-brand-primary">
+                                <FileText className="h-3.5 w-3.5 text-brand-muted/60" />
+                                <span className={isLinked ? "text-accent-mint" : ""}>{f.name}</span>
                               </div>
                               <div className="flex justify-between mt-1 text-[8px] text-white/40">
                                 <span>{f.size}</span>
-                                {isLinked && <span className="text-[#6CECC8]">ACTIVE REFER</span>}
+                                {isLinked && <span className="text-accent-mint">ACTIVE REFER</span>}
                               </div>
                             </div>
                           );
@@ -612,10 +648,10 @@ export default function SettingsModal({
                 </div>
 
                 {/* NotebookLM Connector as sub-accordion block */}
-                <div className="p-4 rounded-xl bg-[#040910]/60 border border-white/5">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-white/5 mb-3">
+                <div className="p-4 rounded-xl bg-brand-deep/60 border border-glass">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-glass mb-3">
                     <div className="flex items-center gap-2">
-                      <FolderKanban className="h-4.5 w-4.5 text-[#B48FFF]" />
+                      <FolderKanban className="h-4.5 w-4.5 text-accent-violet" />
                       <div>
                         <span className="text-[10px] font-space font-bold text-white uppercase tracking-wide">NotebookLM Guidelines Sync</span>
                         <p className="text-[8px] text-white/40 uppercase font-mono mt-0.5">Parse brand notes assemblies</p>
@@ -627,7 +663,7 @@ export default function SettingsModal({
                       className={`px-2 py-0.5 text-[8px] font-mono font-bold uppercase rounded-md border cursor-pointer transition-all ${
                         integrations.notebookLM.connected
                           ? "bg-red-400/10 text-red-400 border-red-400/25"
-                          : "bg-[#B48FFF]/10 text-[#B48FFF] border-[#B48FFF]/25"
+                          : "bg-accent-violet/10 text-accent-violet border-accent-violet/25"
                       }`}
                     >
                       {integrations.notebookLM.connected ? "Disconnect" : "Connect portal"}
@@ -643,13 +679,13 @@ export default function SettingsModal({
                             key={proj.id}
                             onClick={() => handleLinkNotebookProject(proj.id)}
                             className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
-                              isLinked ? "bg-[#B48FFF]/10 border-[#B48FFF]/30 text-white" : "bg-[#040910] border-white/5 hover:bg-[#07101F] text-[#9BAAD4]/80"
+                              isLinked ? "bg-accent-violet/10 border-accent-violet/30 text-white" : "bg-brand-deep border-glass hover:bg-brand-secondary text-brand-muted/80"
                             }`}
                           >
-                            <span className="font-bold text-[10px] block text-[#EDF2FF] truncate">{proj.name}</span>
+                            <span className="font-bold text-[10px] block text-brand-primary truncate">{proj.name}</span>
                             <div className="flex justify-between text-[8px] text-white/35 font-mono mt-1">
                               <span>{proj.notes} notes synced</span>
-                              {isLinked && <span className="text-[#B48FFF] font-black uppercase">LINKED REF</span>}
+                              {isLinked && <span className="text-accent-violet font-black uppercase">LINKED REF</span>}
                             </div>
                           </div>
                         );
@@ -662,12 +698,12 @@ export default function SettingsModal({
 
             {/* 5. GITHUB & HUGGINGFACE */}
             {activeTab === "devGitHub" && (
-              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-[#9BAAD4]/85">
+              <div className="space-y-4 animate-fade-in text-[11px] leading-relaxed text-brand-muted/85">
                 <p>Manage git repositories linkage to commit prompt models, or browse Hugging Face open assemblies to pull parameters.</p>
 
                 {/* Compact elegant GitHub repository setup */}
-                <div className="p-4 rounded-xl bg-[#040910]/60 border border-white/5">
-                  <div className="flex items-center justify-between pb-3.5 border-b border-white/5 mb-3.5">
+                <div className="p-4 rounded-xl bg-brand-deep/60 border border-glass">
+                  <div className="flex items-center justify-between pb-3.5 border-b border-glass mb-3.5">
                     <div className="flex items-center gap-2">
                       <Github className="h-4.5 w-4.5 text-white" />
                       <div>
@@ -676,9 +712,9 @@ export default function SettingsModal({
                       </div>
                     </div>
                     {integrations.github.connected ? (
-                      <span className="px-2 py-0.5 text-[8px] font-mono bg-[#6CECC8]/10 text-[#6CECC8] border border-[#6CECC8]/20 rounded-md font-bold uppercase tracking-wider">Authorized</span>
+                      <span className="px-2 py-0.5 text-[8px] font-mono bg-accent-mint/10 text-accent-mint border border-accent-mint/20 rounded-md font-bold uppercase tracking-wider">Authorized</span>
                     ) : (
-                      <span className="px-2 py-0.5 text-[8px] font-mono bg-white/5 text-white/40 border border-white/5 rounded-md font-bold uppercase tracking-wider">Closed</span>
+                      <span className="px-2 py-0.5 text-[8px] font-mono bg-white/5 text-white/40 border border-glass rounded-md font-bold uppercase tracking-wider">Closed</span>
                     )}
                   </div>
 
@@ -687,7 +723,7 @@ export default function SettingsModal({
                       <span className="text-white/30 uppercase">Establish repository mapping for version release control</span>
                       <button
                         onClick={() => toggleConnection("github")}
-                        className="bg-[#EDF2FF] hover:bg-emerald-400 hover:text-black text-black font-black uppercase text-[8px] tracking-wider px-3 py-1.5 rounded-lg transition-all"
+                        className="bg-accent-mint hover:bg-emerald-400 hover:text-black text-black font-black uppercase text-[8px] tracking-wider px-3 py-1.5 rounded-lg transition-all"
                       >
                         Authorize repository
                       </button>
@@ -695,7 +731,7 @@ export default function SettingsModal({
                   ) : (
                     <div className="space-y-3 font-mono text-[9px]">
                       <div className="flex justify-between items-center text-white/50">
-                        <span>REPOSITORY: <strong className="text-[#6CECC8]">{integrations.github.repoName}</strong></span>
+                        <span>REPOSITORY: <strong className="text-accent-mint">{integrations.github.repoName}</strong></span>
                         <button onClick={() => toggleConnection("github")} className="text-red-400 uppercase font-semibold">Fork close</button>
                       </div>
 
@@ -705,19 +741,19 @@ export default function SettingsModal({
                           value={gitCommitMsg}
                           onChange={(e) => setGitCommitMsg(e.target.value)}
                           placeholder="Short commit summary (e.g., policy constraints revision)..."
-                          className="flex-1 bg-[#040910] border border-white/5 p-2 rounded-lg text-[9px] text-[#EDF2FF]"
+                          className="flex-1 bg-brand-deep border border-glass p-2 rounded-lg text-[9px] text-brand-primary"
                         />
                         <button
                           onClick={executeGitHubCommitPush}
                           disabled={!gitCommitMsg.trim()}
-                          className="bg-[#6CECC8] hover:bg-[#52cfaa] text-black font-black uppercase text-[8.5px] px-3 py-2 rounded-lg cursor-pointer disabled:opacity-30 self-stretch flex items-center justify-center uppercase font-sans"
+                          className="bg-accent-mint hover:bg-[#52cfaa] text-black font-black uppercase text-[8.5px] px-3 py-2 rounded-lg cursor-pointer disabled:opacity-30 self-stretch flex items-center justify-center uppercase font-sans"
                         >
                           Commit & Push
                         </button>
                       </div>
 
                       {githubCommitLog.length > 0 && (
-                        <div className="bg-[#03060b] p-2.5 rounded-lg border border-white/[0.02] max-h-[60px] overflow-y-auto font-mono text-[8.5px] text-[#9BAAD4]/50 leading-normal uppercase">
+                        <div className="bg-[#03060b] p-2.5 rounded-lg border border-white/[0.02] max-h-[60px] overflow-y-auto font-mono text-[8.5px] text-brand-muted/50 leading-normal uppercase">
                           {githubCommitLog.map((log, idx) => (
                             <div key={idx} className="truncate">• {log}</div>
                           ))}
@@ -728,10 +764,10 @@ export default function SettingsModal({
                 </div>
 
                 {/* Hugging Face template database query */}
-                <div className="p-4 rounded-xl bg-[#040910]/60 border border-white/5">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
+                <div className="p-4 rounded-xl bg-brand-deep/60 border border-glass">
+                  <div className="flex items-center justify-between pb-3 border-b border-glass mb-3">
                     <div className="flex items-center gap-2">
-                      <Layers className="h-4.5 w-4.5 text-[#6CECC8]" />
+                      <Layers className="h-4.5 w-4.5 text-accent-mint" />
                       <div>
                         <span className="text-[10px] font-space font-bold text-white uppercase tracking-wide">Hugging Face System Registry</span>
                         <p className="text-[8px] text-white/40 uppercase font-mono mt-0.5">Scaffold prompts templates directly</p>
@@ -740,7 +776,7 @@ export default function SettingsModal({
                     <button
                       onClick={() => toggleConnection("huggingFace")}
                       className={`px-2 py-0.5 text-[8.5px] font-mono font-bold uppercase rounded-md border cursor-pointer ${
-                        integrations.huggingFace.connected ? "bg-red-500/10 text-red-300 border-red-500/20" : "bg-[#6CECC8]/10 text-[#6CECC8] border-[#6CECC8]/20"
+                        integrations.huggingFace.connected ? "bg-red-500/10 text-red-300 border-red-500/20" : "bg-accent-mint/10 text-accent-mint border-accent-mint/20"
                       }`}
                     >
                       {integrations.huggingFace.connected ? "Closed" : "Portal open"}
@@ -754,7 +790,7 @@ export default function SettingsModal({
                         value={searchHFQuery}
                         onChange={(e) => setSearchHFQuery(e.target.value)}
                         placeholder="Search open templates on HuggingFace registry (e.g., storytelling, classifier)..."
-                        className="w-full rounded-lg focus:outline-none p-2 bg-[#040910] border border-white/5 text-[9.5px] text-white uppercase"
+                        className="w-full rounded-lg focus:outline-none p-2 bg-brand-deep border border-glass text-[9.5px] text-white uppercase"
                       />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
@@ -764,13 +800,13 @@ export default function SettingsModal({
                             onClick={() => {
                               onHuggingFaceTemplatePicked(t);
                             }}
-                            className="p-2.5 rounded-lg bg-[#040910] border border-white/5 hover:border-[#6CECC8]/40 hover:bg-[#6CECC8]/5 cursor-pointer transition-all flex justify-between items-center text-[10px] font-sans text-left"
+                            className="p-2.5 rounded-lg bg-brand-deep border border-glass hover:border-accent-mint/40 hover:bg-accent-mint/5 cursor-pointer transition-all flex justify-between items-center text-[10px] font-sans text-left"
                           >
                             <div>
-                              <span className="font-extrabold text-[#EDF2FF] uppercase tracking-wide block truncate max-w-[170px]">{t.name}</span>
+                              <span className="font-extrabold text-brand-primary uppercase tracking-wide block truncate max-w-[170px]">{t.name}</span>
                               <span className="text-[8px] font-mono text-white/35 uppercase mt-0.5 leading-none block">by {t.author}</span>
                             </div>
-                            <span className="text-[8px] font-mono text-[#6CECC8] font-bold bg-[#6CECC8]/10 border border-[#6CECC8]/20 px-1.5 py-0.5 rounded shrink-0 uppercase">
+                            <span className="text-[8px] font-mono text-accent-mint font-bold bg-accent-mint/10 border border-accent-mint/20 px-1.5 py-0.5 rounded shrink-0 uppercase">
                               {t.downloads} dls
                             </span>
                           </div>

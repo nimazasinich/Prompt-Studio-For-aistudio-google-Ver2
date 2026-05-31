@@ -173,7 +173,7 @@ export default function KnowledgeSearch({
   return (
     <div className="space-y-6 font-sans">
       {/* Tab Selectors for Dual-Catalog Mode */}
-      <div className="flex border-b border-white/10 select-none pb-1.5 justify-start items-center gap-6">
+      <div className="flex border-b border-glass select-none pb-1.5 justify-start items-center gap-6">
         <button
           onClick={() => setActiveCatalogTab("templates")}
           className={`pb-2.5 text-sm uppercase font-black tracking-widest transition-all relative ${
@@ -214,11 +214,11 @@ export default function KnowledgeSearch({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search token parameters, prompt patterns..."
-                className="w-full text-xs rounded-xl border border-white/10 pl-11 pr-4 py-3 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-bold focus:outline-none focus:border-emerald-500 transition-all"
+                className="w-full text-xs rounded-xl border border-glass pl-11 pr-4 py-3 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-bold focus:outline-none focus:border-emerald-500 transition-all"
               />
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pb-3 border-b border-white/10">
+            <div className="flex flex-wrap gap-1.5 pb-3 border-b border-glass">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
@@ -232,7 +232,7 @@ export default function KnowledgeSearch({
                   className={`rounded-full px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider transition-all border ${
                     activeCategory === cat.id
                       ? "bg-emerald-500 text-black border-transparent shadow-md"
-                      : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white"
+                      : "bg-white/5 text-white/40 border-glass hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {cat.label}
@@ -270,8 +270,8 @@ export default function KnowledgeSearch({
 
           <div className="col-span-1 lg:col-span-3">
             {selectedArticle ? (
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-sm space-y-5">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/10 pb-4 gap-3">
+              <div className="rounded-3xl border border-glass bg-white/5 p-6 shadow-sm space-y-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-glass pb-4 gap-3">
                   <div className="space-y-1">
                     <span className="text-[9px] font-mono uppercase font-black tracking-[0.25em] text-emerald-500 block">{selectedArticle.category}</span>
                     <h3 className="text-lg font-black text-white uppercase tracking-wider">{selectedArticle.title}</h3>
@@ -288,7 +288,7 @@ export default function KnowledgeSearch({
                 <div className="text-xs text-white/80 leading-relaxed font-sans max-h-[400px] overflow-y-auto pr-2 space-y-4 select-text">
                   {selectedArticle.content.split("\n\n").map((para, i) => {
                     if (para.startsWith("###")) {
-                      return <h3 key={i} className="text-sm font-black text-emerald-400 uppercase tracking-widest mt-6 border-b border-white/5 pb-1.5">{para.replace("###", "")}</h3>;
+                      return <h3 key={i} className="text-sm font-black text-emerald-400 uppercase tracking-widest mt-6 border-b border-glass pb-1.5">{para.replace("###", "")}</h3>;
                     } else if (para.startsWith("####")) {
                       return <h4 key={i} className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mt-4">{para.replace("####", "")}</h4>;
                     } else if (para.includes("- ")) {
@@ -305,7 +305,7 @@ export default function KnowledgeSearch({
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-12 bg-white/5 border border-white/10 h-96 text-center rounded-3xl">
+              <div className="flex flex-col items-center justify-center p-12 bg-white/5 border border-glass h-96 text-center rounded-3xl">
                 <BookOpen className="h-10 w-10 text-white/20 mb-3 animate-pulse" />
                 <p className="text-xs text-white/40 uppercase font-bold tracking-wider">Select an article catalog index to begin reading</p>
               </div>
@@ -325,7 +325,7 @@ export default function KnowledgeSearch({
                 value={templateQuery}
                 onChange={(e) => setTemplateQuery(e.target.value)}
                 placeholder="Search templates (e.g. refactor, financial)..."
-                className="w-full text-xs rounded-xl border border-white/10 pl-11 pr-4 py-3 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-bold focus:outline-none focus:border-emerald-500 transition-all"
+                className="w-full text-xs rounded-xl border border-glass pl-11 pr-4 py-3 bg-white/5 text-white uppercase placeholder:text-white/20 tracking-wider font-bold focus:outline-none focus:border-emerald-500 transition-all"
               />
             </div>
 
@@ -346,7 +346,7 @@ export default function KnowledgeSearch({
                     className={`rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider transition-all border ${
                       selectedCategoryFilter === tc.id
                         ? "bg-emerald-500 text-black border-transparent"
-                        : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white"
+                        : "bg-white/5 text-white/40 border-glass hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {tc.label}
@@ -371,7 +371,7 @@ export default function KnowledgeSearch({
                     className={`rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider transition-all border ${
                       selectedModelFilter === m.id
                         ? "bg-slate-200 text-black border-transparent"
-                        : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white"
+                        : "bg-white/5 text-white/40 border-glass hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {m.label}
@@ -396,7 +396,7 @@ export default function KnowledgeSearch({
                     className={`rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider transition-all border ${
                       selectedTagFilter === tg.id
                         ? "bg-emerald-500 text-black border-transparent"
-                        : "bg-white/5 text-emerald-450 border-white/10 hover:bg-white/10 hover:text-white"
+                        : "bg-white/5 text-emerald-450 border-glass hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {tg.label}
@@ -428,7 +428,7 @@ export default function KnowledgeSearch({
                       }`}
                     >
                       <div className="flex justify-between items-start">
-                        <span className="text-[8px] font-mono uppercase bg-white/10 text-white/80 border border-white/10 rounded px-1.5 py-0.5 tracking-wider mb-2 font-bold select-none">{tmpl.category}</span>
+                        <span className="text-[8px] font-mono uppercase bg-white/10 text-white/80 border border-glass rounded px-1.5 py-0.5 tracking-wider mb-2 font-bold select-none">{tmpl.category}</span>
                         <span className="text-[8px] font-mono text-emerald-400 uppercase font-black">{tmpl.model}</span>
                       </div>
                       <p className="font-extrabold text-xs text-white uppercase tracking-wider truncate mb-1">{tmpl.name}</p>
@@ -438,7 +438,7 @@ export default function KnowledgeSearch({
                           {tmpl.tags.map((tg) => (
                             <span
                               key={tg}
-                              className="text-[8px] font-mono font-bold bg-[#040910] text-[#6CECC8] px-1.5 py-0.5 rounded border border-[#6CECC8]/10 uppercase"
+                              className="text-[8px] font-mono font-bold bg-brand-deep text-accent-mint px-1.5 py-0.5 rounded border border-accent-mint/10 uppercase"
                             >
                               #{tg}
                             </span>
@@ -455,16 +455,16 @@ export default function KnowledgeSearch({
           {/* Renders Selected Template read detail view & Sandbox import features */}
           <div className="col-span-1 lg:col-span-3">
             {selectedTemplate ? (
-              <div className="rounded-3xl border border-white/8 bg-[#07101F] p-6 shadow-sm space-y-5 relative">
+              <div className="rounded-3xl border border-white/8 bg-brand-secondary p-6 shadow-sm space-y-5 relative">
                 
                 {/* Header detail */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/10 pb-4 gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-glass pb-4 gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[8px] font-mono uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md px-2 py-0.5 tracking-widest font-black select-none">
                         {selectedTemplate.category}
                       </span>
-                      <span className="text-[8px] font-mono uppercase bg-white/10 text-white/80 border border-white/10 rounded-md px-2 py-0.5 tracking-widest font-black select-none">
+                      <span className="text-[8px] font-mono uppercase bg-white/10 text-white/80 border border-glass rounded-md px-2 py-0.5 tracking-widest font-black select-none">
                         Target: {selectedTemplate.model}
                       </span>
                     </div>
@@ -517,11 +517,11 @@ export default function KnowledgeSearch({
                 )}
 
                 {/* Quick Info */}
-                <p className="text-xs text-white/70 italic leading-relaxed select-text p-4 rounded-2xl bg-white/5 border border-white/10">{selectedTemplate.description}</p>
+                <p className="text-xs text-white/70 italic leading-relaxed select-text p-4 rounded-2xl bg-white/5 border border-glass">{selectedTemplate.description}</p>
 
                 {/* Grading Parameters Row */}
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-1 text-[10px] font-mono uppercase tracking-widest text-white/40">
+                <div className="bg-white/5 p-4 rounded-2xl border border-glass space-y-3">
+                  <div className="flex justify-between items-center border-b border-glass pb-1 text-[10px] font-mono uppercase tracking-widest text-white/40">
                     <span>Template Blueprint Score Index</span>
                     <span className="text-emerald-400 font-bold flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-current" /> {selectedTemplate.scores.overall}/100 QUALITY_RATING</span>
                   </div>
@@ -579,7 +579,7 @@ export default function KnowledgeSearch({
 
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-12 bg-white/5 border border-white/10 h-96 text-center rounded-3xl">
+              <div className="flex flex-col items-center justify-center p-12 bg-white/5 border border-glass h-96 text-center rounded-3xl">
                 <Compass className="h-10 w-10 text-white/20 mb-3 animate-pulse" />
                 <p className="text-xs text-white/40 uppercase font-bold tracking-wider">Select a template blueprint above to see architectural specification details</p>
               </div>

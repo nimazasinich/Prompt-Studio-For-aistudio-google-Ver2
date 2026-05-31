@@ -61,9 +61,9 @@ export default function Pipelines({
     <div className="space-y-6 font-sans text-white h-full max-h-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar pr-1 animate-fade-in">
       
       {/* Top Banner Control Panel */}
-      <div className="rounded-3xl border border-[#B48FFF]/15 bg-gradient-to-tr from-[#07101F]/90 to-[#B48FFF]/5 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 select-none">
+      <div className="rounded-3xl border border-accent-violet/15 bg-gradient-to-tr from-brand-secondary/90 to-accent-violet/5 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 select-none">
         <div className="space-y-1">
-          <span className="text-[9px] font-mono font-black text-[#B48FFF] uppercase tracking-[0.2em] bg-[#B48FFF]/10 border border-[#B48FFF]/20 px-2.5 py-0.5 rounded leading-none inline-block">Enterprise CI/CD Pipelines</span>
+          <span className="text-[9px] font-mono font-black text-accent-violet uppercase tracking-[0.2em] bg-accent-violet/10 border border-accent-violet/20 px-2.5 py-0.5 rounded leading-none inline-block">Enterprise CI/CD Pipelines</span>
           <h4 className="text-sm font-space font-extrabold uppercase tracking-wider text-white">Staged Deployment Stream</h4>
           <p className="text-[10px] text-white/50">Auto-deploy refined prompt revisions straight to cloud-ingress endpoints.</p>
         </div>
@@ -71,7 +71,7 @@ export default function Pipelines({
         <button 
           onClick={triggerMockPipelineRun}
           disabled={isRunningPipeline}
-          className="rounded-xl px-4 py-2.5 bg-[#B48FFF] hover:bg-[#a37ce6] text-black text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-center cursor-pointer disabled:opacity-40"
+          className="rounded-xl px-4 py-2.5 bg-accent-violet hover:bg-[#a37ce6] text-black text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-center cursor-pointer disabled:opacity-40"
         >
           {isRunningPipeline ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -86,9 +86,9 @@ export default function Pipelines({
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1 min-h-0">
         
         {/* Left column: Pipelines Status Timeline */}
-        <div className="col-span-1 lg:col-span-3 rounded-2xl border border-white/10 bg-white/5 p-5 flex flex-col min-h-0">
-          <div className="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-4 select-none shrink-0">
-            <Layers className="h-5 w-5 text-[#B48FFF]" />
+        <div className="col-span-1 lg:col-span-3 rounded-2xl border border-glass bg-white/5 p-5 flex flex-col min-h-0">
+          <div className="flex items-center gap-2.5 border-b border-glass pb-4 mb-4 select-none shrink-0">
+            <Layers className="h-5 w-5 text-accent-violet" />
             <div>
               <h5 className="text-[11px] font-black uppercase tracking-wider text-white">CI/CD Run Summary</h5>
               <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest mt-0.5 leading-none">Automated testing validation steps</p>
@@ -101,11 +101,11 @@ export default function Pipelines({
             <div className="space-y-3">
               <span className="text-[10px] font-mono text-white/35 uppercase tracking-wider block mb-1">Execution Pipeline Chain</span>
               {PIPELINE_STEPS.map((step, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-[#040910]/40 border border-white/5 flex items-start gap-3">
+                <div key={idx} className="p-3.5 rounded-xl bg-brand-deep/40 border border-glass flex items-start gap-3">
                   <div className={`mt-0.5 h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
                     step.status === "success" 
                       ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" 
-                      : "bg-[#B48FFF]/10 border-[#B48FFF]/30 text-[#B48FFF]"
+                      : "bg-accent-violet/10 border-accent-violet/30 text-accent-violet"
                   }`}>
                     {step.status === "success" ? (
                       <CheckCircle2 className="h-3 w-3" />
@@ -123,8 +123,8 @@ export default function Pipelines({
 
             {/* Timely Deploy history logs */}
             <div className="flex flex-col min-h-0">
-              <span className="text-[10px] font-mono text-[#B48FFF]/65 uppercase tracking-wider block mb-2">Live Dev Release Logs</span>
-              <div className="flex-1 rounded-xl bg-black/60 p-4 font-mono text-[10px] text-emerald-400 border border-white/5 leading-relaxed overflow-y-auto custom-scrollbar h-52 select-all whitespace-pre-wrap">
+              <span className="text-[10px] font-mono text-accent-violet/65 uppercase tracking-wider block mb-2">Live Dev Release Logs</span>
+              <div className="flex-1 rounded-xl bg-black/60 p-4 font-mono text-[10px] text-emerald-400 border border-glass leading-relaxed overflow-y-auto custom-scrollbar h-52 select-all whitespace-pre-wrap">
                 {pipelineLogs.map((log, idx) => (
                   <div key={idx} className="border-b border-white/[0.02] pb-1 mb-1 font-bold">
                     <span className="text-white/30 mr-1.5">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
@@ -138,9 +138,9 @@ export default function Pipelines({
         </div>
 
         {/* Right column: Target Environments Deployments */}
-        <div className="col-span-1 lg:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-5 flex flex-col min-h-0">
-          <div className="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-4 select-none shrink-0">
-            <Server className="h-5 w-5 text-[#B48FFF]" />
+        <div className="col-span-1 lg:col-span-2 rounded-2xl border border-glass bg-white/5 p-5 flex flex-col min-h-0">
+          <div className="flex items-center gap-2.5 border-b border-glass pb-4 mb-4 select-none shrink-0">
+            <Server className="h-5 w-5 text-accent-violet" />
             <div>
               <h5 className="text-[11px] font-black uppercase tracking-wider text-white">Production Alignments</h5>
               <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest mt-0.5 leading-none">Staged model endpoint mapping</p>
@@ -148,10 +148,10 @@ export default function Pipelines({
           </div>
 
           <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-0.5 min-h-0">
-            <div className="p-3.5 rounded-xl border border-dashed border-white/5 select-none text-center">
+            <div className="p-3.5 rounded-xl border border-dashed border-glass select-none text-center">
               <Activity className="h-5 w-5 text-emerald-400 mx-auto mb-2 animate-pulse" />
               <p className="text-[10px] font-bold text-white uppercase tracking-wide">Automatic Sync Status</p>
-              <p className="text-[9px] text-[#9BAAD4]/60 uppercase font-mono mt-0.5 leading-relaxed">
+              <p className="text-[9px] text-brand-muted/60 uppercase font-mono mt-0.5 leading-relaxed">
                 Staged prompts automatically update client wrappers with zero cold starting overhead
               </p>
             </div>
@@ -159,13 +159,13 @@ export default function Pipelines({
             <span className="text-[10px] font-mono text-white/35 uppercase tracking-wider block select-none">Deployment Staging Register</span>
             
             {DEPLOYMENT_STREAM.map((stream, idx) => (
-              <div key={idx} className="p-3.5 rounded-xl bg-[#040910]/40 border border-white/5 space-y-2 text-left">
+              <div key={idx} className="p-3.5 rounded-xl bg-brand-deep/40 border border-glass space-y-2 text-left">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black font-mono text-white uppercase tracking-wider">{stream.version}</span>
                   <span className={`text-[8px] font-mono px-2 py-0.5 rounded font-black border ${
                     stream.status === "LIVE PRODUCTION" 
                       ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.15)] animate-pulse" 
-                      : "bg-white/5 border-white/10 text-white/45"
+                      : "bg-white/5 border-glass text-white/45"
                   }`}>
                     {stream.status}
                   </span>

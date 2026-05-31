@@ -202,11 +202,11 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#040910]/95 backdrop-blur-md p-6 select-none animate-fade-in">
-      <div className="relative w-full max-w-md rounded-3xl bg-[#07101F] border border-white/8 p-8 shadow-2xl overflow-hidden animate-zoom-in text-[#EDF2FF]/95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-deep/95 backdrop-blur-md p-6 select-none animate-fade-in">
+      <div className="relative w-full max-w-md rounded-3xl bg-brand-secondary border border-white/8 p-8 shadow-2xl overflow-hidden animate-zoom-in text-brand-primary/95">
         
         {/* Glow Header */}
-        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-[#6CECC8] via-[#79AEFF] to-[#B48FFF]"></div>
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-accent-mint via-accent-blue to-accent-violet"></div>
 
         {/* Close Button */}
         <button
@@ -218,7 +218,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
 
         {/* Identity Badge */}
         <div className="flex items-center gap-2 mb-6">
-          <div className="p-2 rounded-xl bg-[#6CECC8]/10 text-[#6CECC8] border border-[#6CECC8]/20">
+          <div className="p-2 rounded-xl bg-accent-mint/10 text-accent-mint border border-accent-mint/20">
             <Shield className="h-5 w-5" />
           </div>
           <div>
@@ -229,7 +229,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
 
         {/* Tab selection */}
         {!currentUser && (
-          <div className="flex border-b border-white/10 mb-6 font-sans">
+          <div className="flex border-b border-glass mb-6 font-sans">
             <button
               onClick={() => handleTabChange("login")}
               className={`flex-1 pb-3 text-xs uppercase font-extrabold tracking-wider text-center transition-all ${
@@ -278,7 +278,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-glass focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
                 />
                 <Mail className="absolute left-3.5 top-3 h-4 w-4 text-white/30" />
               </div>
@@ -293,7 +293,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none text-white placeholder:text-white/20"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-glass focus:border-emerald-500 focus:outline-none text-white placeholder:text-white/20"
                 />
                 <Lock className="absolute left-3.5 top-3 h-4 w-4 text-white/30" />
               </div>
@@ -309,16 +309,16 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
 
             {/* Social Divider */}
             <div className="relative my-6 flex py-1 items-center">
-              <div className="flex-grow border-t border-white/10"></div>
+              <div className="flex-grow border-t border-glass"></div>
               <span className="flex-shrink mx-4 text-3xs font-mono text-white/30 uppercase tracking-widest">Federated Access</span>
-              <div className="flex-grow border-t border-white/10"></div>
+              <div className="flex-grow border-t border-glass"></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => handleSocialMockLogin("google")}
-                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-[10px] uppercase font-mono tracking-wider font-extrabold hover:bg-white/10 transition-all"
+                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-glass bg-white/5 text-[10px] uppercase font-mono tracking-wider font-extrabold hover:bg-white/10 transition-all"
               >
                 <Globe className="h-3.5 w-3.5 text-emerald-400" />
                 <span>Google</span>
@@ -326,7 +326,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
               <button
                 type="button"
                 onClick={() => handleSocialMockLogin("github")}
-                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-[10px] uppercase font-mono tracking-wider font-extrabold hover:bg-white/10 transition-all"
+                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-glass bg-white/5 text-[10px] uppercase font-mono tracking-wider font-extrabold hover:bg-white/10 transition-all"
               >
                 <Lock className="h-3.5 w-3.5 text-slate-400" />
                 <span>GitHub</span>
@@ -347,7 +347,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-glass focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
                 />
                 <User className="absolute left-3.5 top-3 h-4 w-4 text-white/30" />
               </div>
@@ -362,7 +362,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@company.com"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-glass focus:border-emerald-500 focus:outline-none text-white tracking-wide placeholder:text-white/20"
                 />
                 <Mail className="absolute left-3.5 top-3 h-4 w-4 text-white/30" />
               </div>
@@ -377,7 +377,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none text-white placeholder:text-white/20"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-white/5 border border-glass focus:border-emerald-500 focus:outline-none text-white placeholder:text-white/20"
                 />
                 <Lock className="absolute left-3.5 top-3 h-4 w-4 text-white/30" />
               </div>
@@ -397,7 +397,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
         {currentUser && (
           <form onSubmit={handleProfileUpdateSubmit} className="space-y-4">
             {/* User Identity Banner */}
-            <div className="flex items-center gap-3.5 bg-white/5 border border-white/10 rounded-2xl p-4 mb-2">
+            <div className="flex items-center gap-3.5 bg-white/5 border border-glass rounded-2xl p-4 mb-2">
               <div className="h-10 w-10 flex shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-black text-xs font-black uppercase">
                 {currentUser.name ? currentUser.name.charAt(0) : "U"}
               </div>
@@ -415,7 +415,7 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Weave a brief bio of your system architectural specializations..."
                 rows={2}
-                className="w-full text-xs rounded-xl border border-white/10 px-4 py-2.5 focus:border-emerald-500 focus:outline-none bg-white/5 text-white placeholder:text-white/20 resize-none"
+                className="w-full text-xs rounded-xl border border-glass px-4 py-2.5 focus:border-emerald-500 focus:outline-none bg-white/5 text-white placeholder:text-white/20 resize-none"
               />
             </div>
 
@@ -424,11 +424,11 @@ export default function AuthModal({ onClose, currentUser, onLogin, onLogout }: A
               <select
                 value={preferredModel}
                 onChange={(e) => setPreferredModel(e.target.value)}
-                className="w-full text-xs rounded-xl border border-white/8 px-4 py-2.5 focus:border-[#6CECC8] focus:outline-none bg-white/5 text-[#9BAAD4] focus:text-white"
+                className="w-full text-xs rounded-xl border border-white/8 px-4 py-2.5 focus:border-accent-mint focus:outline-none bg-white/5 text-brand-muted focus:text-white"
               >
-                <option value="Gemini 2.0 Flash" className="bg-[#07101F]">Gemini 2.0 Flash (Default)</option>
-                <option value="Gemini 1.5 Pro" className="bg-[#07101F]">Gemini 1.5 Pro (Precision Context)</option>
-                <option value="Gemini 1.5 Flash" className="bg-[#07101F]">Gemini 1.5 Flash (Bulk Inferences)</option>
+                <option value="Gemini 2.0 Flash" className="bg-brand-secondary">Gemini 2.0 Flash (Default)</option>
+                <option value="Gemini 1.5 Pro" className="bg-brand-secondary">Gemini 1.5 Pro (Precision Context)</option>
+                <option value="Gemini 1.5 Flash" className="bg-brand-secondary">Gemini 1.5 Flash (Bulk Inferences)</option>
               </select>
             </div>
 
