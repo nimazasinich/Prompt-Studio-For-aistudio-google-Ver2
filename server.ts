@@ -325,6 +325,37 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Runtime diagnostics endpoint
+app.get("/api/diagnostics", (req, res) => {
+  const hasGemini = !!API_KEY && API_KEY !== "MY_GEMINI_API_KEY";
+  const hasGithubToken = !!(process.env.GITHUB_PERSONAL_ACCESS_TOKEN || "").trim();
+  const hasGoogleOAuth = !!(process.env.GOOGLE_CLIENT_ID || "").trim();
+  const sessionCount = Object.keys(sessionsState).length;
+  const sessionsWithPrompts = Object.values(sessionsState).filter(s => s.currentPrompt !== null).length;
+
+  res.json({
+    server: { status: "ACTIVE", uptime: process.uptime(), timestamp: new Date().toISOString() },
+    geminiApi: { status: hasGemini ? "ACTIVE" : "SANDBOX", configured: hasGemini, mode: hasGemini ? "REAL" : "SANDBOX" },
+    github: { status: hasGithubToken ? "CONNECTED" : "NOT_CONFIGURED", configured: hasGithubToken, repoName: process.env.GITHUB_REPO_NAME || null },
+    googleOAuth: { status: hasGoogleOAuth ? "CONFIGURED" : "NOT_CONFIGURED", configured: hasGoogleOAuth },
+    storage: { adapter: process.env.USE_FIRESTORE === "true" ? "Firestore" : "FileSystem/Memory", sessionCount, sessionsWithPrompts },
+    features: {
+      promptOptimization: hasGemini ? "ACTIVE" : "SANDBOX",
+      chatConversation: hasGemini ? "ACTIVE" : "SANDBOX",
+      feedbackAuditor: hasGemini ? "ACTIVE" : "SANDBOX",
+      testingSuite: hasGemini ? "ACTIVE" : "SANDBOX",
+      selfCorrection: "ACTIVE",
+      knowledgeBase: "ACTIVE",
+      templateLibrary: "ACTIVE"
+    },
+    missingCredentials: [
+      ...(!hasGemini ? ["GEMINI_API_KEY"] : []),
+      ...(!hasGithubToken ? ["GITHUB_PERSONAL_ACCESS_TOKEN"] : []),
+      ...(!hasGoogleOAuth ? ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"] : [])
+    ]
+  });
+});
+
 // AUTHENTICATION ENDPOINTS
 app.post("/api/auth/register", (req, res) => {
   const { email, password, name } = req.body;
@@ -645,11 +676,58 @@ function constructRAGContext(promptIdea: string): string {
   return matchedGuides.join("\n\n");
 }
 
+
+// Sandbox mode detection helper
+function isApiKeyMissing() {
+  return !API_KEY || API_KEY === 'MY_GEMINI_API_KEY';
+}
+
 // POST endpoint: Full prompt optimization and creation
 app.post("/api/prompt/optimize", async (req, res) => {
   const { promptIdea, contextDoc, sessionId } = req.body;
   if (!promptIdea) {
     return res.status(400).json({ error: "Missing promptIdea parameter." });
+  }
+
+  if (isApiKeyMissing()) {
+    const now = new Date().toISOString();
+    const words = promptIdea.split(/\s+/).filter((w) => w.length > 3);
+    const extractedVars = words.length >= 2
+      ? [words[0].toLowerCase().replace(/[^a-z]/g, ''), words[Math.min(1, words.length - 1)].toLowerCase().replace(/[^a-z]/g, '')]
+      : ["topic", "context"];
+
+    const sandboxPrompt = {
+      id: "pdef_" + Math.random().toString(36).substr(2, 9),
+      version: 1,
+      systemInstruction: "You are a specialized AI assistant designed for: " + promptIdea + ".\n\nCRITICAL CONSTRAINTS:\n- Respond only with structured, actionable content directly addressing the user's request.\n- Do NOT include greetings, pleasantries, or meta-commentary.\n- Use clear section headers and bullet points for readability.\n- If the input is ambiguous, state assumptions explicitly.\n- Always validate output matches the expected format.\n\n[SANDBOX MODE: Generated without Gemini API. Add GEMINI_API_KEY for AI-powered optimization.]",
+      userTemplate: "Provide analysis for: {{" + extractedVars[0] + "}} with context: {{" + extractedVars[1] + "}}",
+      variables: extractedVars,
+      examples: [
+        { id: "ex_sb_1", input: "Sample " + extractedVars[0] + " input", output: "Structured response addressing " + extractedVars[0] + " with clear formatting." },
+        { id: "ex_sb_2", input: "Edge case: empty " + extractedVars[1], output: "Assumption: No " + extractedVars[1] + " provided. Proceeding with defaults." }
+      ],
+      createdAt: now,
+      scores: { clarity: 72, constraintAdherence: 68, edgeCases: 60, tokenEfficiency: 75, overall: 69 },
+      scoringFeedback: {
+        clarity: "[SANDBOX] Template-based structure. Connect Gemini API for real scoring.",
+        constraintAdherence: "[SANDBOX] Basic negative constraints included.",
+        edgeCases: "[SANDBOX] Minimal coverage. Real optimization adds comprehensive guards.",
+        tokenEfficiency: "[SANDBOX] Standard token layout."
+      }
+    };
+
+    if (sessionId && sessionsState[sessionId]) {
+      const sess = sessionsState[sessionId];
+      sess.history.push(
+        { id: "hist_" + Math.random().toString(36).substr(2, 9), role: "user", content: "Refine/Optimize prompt idea: " + promptIdea, timestamp: now, type: "optimize" },
+        { id: "hist_" + Math.random().toString(36).substr(2, 9), role: "assistant", content: "[SANDBOX MODE] Generated template-based prompt. Overall: " + sandboxPrompt.scores.overall + "/100 (sandbox estimate). Add GEMINI_API_KEY for production optimization.", timestamp: now, type: "optimize", metadata: { optimizedPrompt: sandboxPrompt, extractedVariables: sandboxPrompt.variables } }
+      );
+      sess.currentPrompt = sandboxPrompt;
+      sess.versionHistory.push(sandboxPrompt);
+      sess.updatedAt = now;
+      saveStateToDisk();
+    }
+    return res.json(sandboxPrompt);
   }
 
   try {
@@ -798,6 +876,19 @@ app.post("/api/sessions/:id/chat", async (req, res) => {
   }
   if (!message) {
     return res.status(400).json({ error: "Missing message parameter" });
+  }
+
+  if (isApiKeyMissing()) {
+    const now = new Date().toISOString();
+    sess.history.push({ id: "hist_" + Math.random().toString(36).substr(2, 9), role: "user", content: message, timestamp: now, type: "chat" });
+    const hasP = !!sess.currentPrompt;
+    const reply = hasP
+      ? "[SANDBOX] Received: \"" + message.substring(0, 80) + (message.length > 80 ? "..." : "") + "\"\n\nCurrent prompt (v" + sess.currentPrompt.version + ") is active. With a Gemini API key, I would analyze your request and suggest modifications. Add GEMINI_API_KEY for real AI chat."
+      : "[SANDBOX] Received: \"" + message.substring(0, 80) + (message.length > 80 ? "..." : "") + "\"\n\nNo compiled prompt active yet. Use the Optimize button to compile a prompt first. Add GEMINI_API_KEY for AI-powered conversations.";
+    sess.history.push({ id: "hist_" + Math.random().toString(36).substr(2, 9), role: "assistant", content: reply, timestamp: now, type: "chat" });
+    sess.updatedAt = now;
+    saveStateToDisk();
+    return res.json({ chatResponse: reply, updatedPrompt: null, session: sess });
   }
 
   try {
@@ -983,6 +1074,37 @@ app.post("/api/prompt/analyze-feedback", async (req, res) => {
     return res.status(400).json({ error: "Missing pasted disappointing output data." });
   }
 
+  if (isApiKeyMissing()) {
+    const now = new Date().toISOString();
+    const snippet = pastedOutput.substring(0, 100);
+    const ver = ((sessionsState[sessionId]?.currentPrompt?.version) || 0) + 1;
+    const result = {
+      diagnosis: "[SANDBOX] The output \"" + snippet + "...\" may violate prompt constraints. Common issues: format non-compliance, tone drift, missing structure.",
+      rootCause: "[SANDBOX] Without Gemini analysis, exact root cause undetermined. Typical causes: ambiguous instructions, missing negative constraints, insufficient few-shot examples.",
+      suggestedFixes: ["Add explicit negative constraints", "Include 2-3 few-shot examples with exact expected format", "Add format validation rules", "[SANDBOX] Connect GEMINI_API_KEY for AI-powered analysis"],
+      patchedPrompt: {
+        id: "pdef_" + Math.random().toString(36).substr(2, 9),
+        version: ver,
+        systemInstruction: (originalPrompt || "You are a helpful assistant.") + "\n\n# SANDBOX AUTO-PATCH\n- Enforce strict output format\n- Reject conversational padding\n- Validate outputs against expected schema",
+        userTemplate: sessionsState[sessionId]?.currentPrompt?.userTemplate || "Respond to: {{query}}",
+        variables: sessionsState[sessionId]?.currentPrompt?.variables || ["query"],
+        examples: sessionsState[sessionId]?.currentPrompt?.examples || [{ id: "ex_1", input: "Sample query", output: "Structured response." }],
+        createdAt: now,
+        scores: { clarity: 70, constraintAdherence: 72, edgeCases: 65, tokenEfficiency: 70, overall: 69 },
+        scoringFeedback: { clarity: "[SANDBOX] Template patch.", constraintAdherence: "[SANDBOX] Basic constraints.", edgeCases: "[SANDBOX] Minimal guards.", tokenEfficiency: "[SANDBOX] Standard." }
+      }
+    };
+    if (sessionId && sessionsState[sessionId]) {
+      const sess = sessionsState[sessionId];
+      sess.currentPrompt = result.patchedPrompt;
+      sess.versionHistory.push(result.patchedPrompt);
+      sess.history.push({ id: "hist_" + Math.random().toString(36).substr(2, 9), role: "assistant", content: "[SANDBOX] Feedback Diagnosis Complete. Prompt patched to v" + ver + ". Score: " + result.patchedPrompt.scores.overall + "/100. Add GEMINI_API_KEY for real analysis.", timestamp: now, type: "feedback_analysis", metadata: { optimizedPrompt: result.patchedPrompt, feedbackAnalysis: { diagnosis: result.diagnosis, rootCause: result.rootCause, suggestedFixes: result.suggestedFixes, previousOutput: pastedOutput, pastedPrompt: originalPrompt || "" } } });
+      sess.updatedAt = now;
+      saveStateToDisk();
+    }
+    return res.json(result);
+  }
+
   try {
     const ai = getGeminiClient();
     const systemInstruction = `
@@ -1123,6 +1245,39 @@ app.post("/api/prompt/run-tests", async (req, res) => {
   const { sessionId, promptDefinition, testScenarios, models } = req.body;
   if (!promptDefinition) {
     return res.status(400).json({ error: "Missing promptDefinition payload to evaluate." });
+  }
+
+  if (isApiKeyMissing()) {
+    const now = new Date().toISOString();
+    const activePrompt = promptDefinition;
+    const modelsToRun = (models && Array.isArray(models) && models.length > 0) ? models : ["gemini-2.0-flash"];
+    let scenariosToRun = testScenarios || [];
+    if (scenariosToRun.length === 0) {
+      const vars = activePrompt.variables || ["input"];
+      scenariosToRun = [
+        { id: "scen_sb_1", name: "Standard Input Test", inputs: Object.fromEntries(vars.map((v) => [v, "Sample " + v + " content"])), expectedCriteria: ["Output follows system instruction format", "No greetings"] },
+        { id: "scen_sb_2", name: "Edge Case: Empty Input", inputs: Object.fromEntries(vars.map((v) => [v, ""])), expectedCriteria: ["Handles empty input gracefully"] },
+        { id: "scen_sb_3", name: "Complex Multipart Input", inputs: Object.fromEntries(vars.map((v) => [v, "Complex " + v + " with special chars"])), expectedCriteria: ["Handles special characters safely"] }
+      ];
+    }
+    const sandboxRuns = [];
+    for (const scenario of scenariosToRun) {
+      for (const model of modelsToRun) {
+        sandboxRuns.push({
+          scenarioName: scenario.name, inputs: scenario.inputs, model,
+          output: "[SANDBOX] Simulated output for \"" + scenario.name + "\" on " + model + ". Real execution requires GEMINI_API_KEY.",
+          evalVerdict: "partial", score: 65,
+          explanation: "[SANDBOX] Simulated evaluation. Prompt has " + activePrompt.variables.length + " variables and " + (activePrompt.examples || []).length + " examples. Connect API for real scoring."
+        });
+      }
+    }
+    if (sessionId && sessionsState[sessionId]) {
+      const sess = sessionsState[sessionId];
+      sess.history.push({ id: "hist_" + Math.random().toString(36).substr(2, 9), role: "assistant", content: "[SANDBOX] Testing Report: " + sandboxRuns.length + " simulated tests across " + modelsToRun.join(", ") + ". Connect GEMINI_API_KEY for real execution.", timestamp: now, type: "test_run", metadata: { testRuns: sandboxRuns } });
+      sess.updatedAt = now;
+      saveStateToDisk();
+    }
+    return res.json({ success: true, testRuns: sandboxRuns, generatedScenarios: scenariosToRun, sandboxMode: true });
   }
 
   try {

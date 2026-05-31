@@ -1,0 +1,354 @@
+{
+  "sess_dgxf6u7me": {
+    "id": "sess_dgxf6u7me",
+    "name": "Draft Prompt Session 1",
+    "createdAt": "2026-05-31T03:06:11.278Z",
+    "updatedAt": "2026-05-31T03:06:11.278Z",
+    "history": [
+      {
+        "id": "hist_init",
+        "role": "system",
+        "content": "Hi! I am your AI Studio Prompt Engineering Co-Pilot. I specialize in designing and verifying top-scoring system instructions, formatting few-shot XML arrays, running auto-tests, and correcting prompts when AI Studio outputs failures. Tell me, what kind of prompt are we crafting today?",
+        "timestamp": "2026-05-31T03:06:11.278Z",
+        "type": "chat"
+      }
+    ],
+    "currentPrompt": null,
+    "versionHistory": []
+  },
+  "sess_kbcd6m6zn": {
+    "id": "sess_kbcd6m6zn",
+    "name": "E2E Test Session",
+    "createdAt": "2026-05-31T03:16:04.783Z",
+    "updatedAt": "2026-05-31T03:16:29.022Z",
+    "history": [
+      {
+        "id": "hist_init",
+        "role": "system",
+        "content": "Hi! I am your AI Studio Prompt Engineering Co-Pilot. I specialize in designing and verifying top-scoring system instructions, formatting few-shot XML arrays, running auto-tests, and correcting prompts when AI Studio outputs failures. Tell me, what kind of prompt are we crafting today?",
+        "timestamp": "2026-05-31T03:16:04.783Z",
+        "type": "chat"
+      },
+      {
+        "id": "hist_sa7cqbdzo",
+        "role": "user",
+        "content": "Refine/Optimize prompt idea: Create a production-grade system prompt for a Google AI Studio assistant that helps product managers write data-backed product requirements.",
+        "timestamp": "2026-05-31T03:16:14.249Z",
+        "type": "optimize"
+      },
+      {
+        "id": "hist_ocy880y5h",
+        "role": "assistant",
+        "content": "[SANDBOX MODE] Generated template-based prompt. Overall: 69/100 (sandbox estimate). Add GEMINI_API_KEY for production optimization.",
+        "timestamp": "2026-05-31T03:16:14.249Z",
+        "type": "optimize",
+        "metadata": {
+          "optimizedPrompt": {
+            "id": "pdef_oplh7acv9",
+            "version": 1,
+            "systemInstruction": "You are a specialized AI assistant designed for: Create a production-grade system prompt for a Google AI Studio assistant that helps product managers write data-backed product requirements..\n\nCRITICAL CONSTRAINTS:\n- Respond only with structured, actionable content directly addressing the user's request.\n- Do NOT include greetings, pleasantries, or meta-commentary.\n- Use clear section headers and bullet points for readability.\n- If the input is ambiguous, state assumptions explicitly.\n- Always validate output matches the expected format.\n\n[SANDBOX MODE: Generated without Gemini API. Add GEMINI_API_KEY for AI-powered optimization.]",
+            "userTemplate": "Provide analysis for: {{create}} with context: {{productiongrade}}",
+            "variables": [
+              "create",
+              "productiongrade"
+            ],
+            "examples": [
+              {
+                "id": "ex_sb_1",
+                "input": "Sample create input",
+                "output": "Structured response addressing create with clear formatting."
+              },
+              {
+                "id": "ex_sb_2",
+                "input": "Edge case: empty productiongrade",
+                "output": "Assumption: No productiongrade provided. Proceeding with defaults."
+              }
+            ],
+            "createdAt": "2026-05-31T03:16:14.249Z",
+            "scores": {
+              "clarity": 72,
+              "constraintAdherence": 68,
+              "edgeCases": 60,
+              "tokenEfficiency": 75,
+              "overall": 69
+            },
+            "scoringFeedback": {
+              "clarity": "[SANDBOX] Template-based structure. Connect Gemini API for real scoring.",
+              "constraintAdherence": "[SANDBOX] Basic negative constraints included.",
+              "edgeCases": "[SANDBOX] Minimal coverage. Real optimization adds comprehensive guards.",
+              "tokenEfficiency": "[SANDBOX] Standard token layout."
+            }
+          },
+          "extractedVariables": [
+            "create",
+            "productiongrade"
+          ]
+        }
+      },
+      {
+        "id": "hist_avhywbejd",
+        "role": "user",
+        "content": "Can you add more constraints around JSON output format?",
+        "timestamp": "2026-05-31T03:16:28.949Z",
+        "type": "chat"
+      },
+      {
+        "id": "hist_fksquh45a",
+        "role": "assistant",
+        "content": "[SANDBOX] Received: \"Can you add more constraints around JSON output format?\"\n\nCurrent prompt (v1) is active. With a Gemini API key, I would analyze your request and suggest modifications. Add GEMINI_API_KEY for real AI chat.",
+        "timestamp": "2026-05-31T03:16:28.949Z",
+        "type": "chat"
+      },
+      {
+        "id": "hist_p9tgplofe",
+        "role": "assistant",
+        "content": "[SANDBOX] Feedback Diagnosis Complete. Prompt patched to v2. Score: 69/100. Add GEMINI_API_KEY for real analysis.",
+        "timestamp": "2026-05-31T03:16:28.970Z",
+        "type": "feedback_analysis",
+        "metadata": {
+          "optimizedPrompt": {
+            "id": "pdef_umnfyzydh",
+            "version": 2,
+            "systemInstruction": "You are a product requirements assistant.\n\n# SANDBOX AUTO-PATCH\n- Enforce strict output format\n- Reject conversational padding\n- Validate outputs against expected schema",
+            "userTemplate": "Provide analysis for: {{create}} with context: {{productiongrade}}",
+            "variables": [
+              "create",
+              "productiongrade"
+            ],
+            "examples": [
+              {
+                "id": "ex_sb_1",
+                "input": "Sample create input",
+                "output": "Structured response addressing create with clear formatting."
+              },
+              {
+                "id": "ex_sb_2",
+                "input": "Edge case: empty productiongrade",
+                "output": "Assumption: No productiongrade provided. Proceeding with defaults."
+              }
+            ],
+            "createdAt": "2026-05-31T03:16:28.970Z",
+            "scores": {
+              "clarity": 70,
+              "constraintAdherence": 72,
+              "edgeCases": 65,
+              "tokenEfficiency": 70,
+              "overall": 69
+            },
+            "scoringFeedback": {
+              "clarity": "[SANDBOX] Template patch.",
+              "constraintAdherence": "[SANDBOX] Basic constraints.",
+              "edgeCases": "[SANDBOX] Minimal guards.",
+              "tokenEfficiency": "[SANDBOX] Standard."
+            }
+          },
+          "feedbackAnalysis": {
+            "diagnosis": "[SANDBOX] The output \"Hello! I would be happy to help you with product requirements. Let me first introduce myself as your...\" may violate prompt constraints. Common issues: format non-compliance, tone drift, missing structure.",
+            "rootCause": "[SANDBOX] Without Gemini analysis, exact root cause undetermined. Typical causes: ambiguous instructions, missing negative constraints, insufficient few-shot examples.",
+            "suggestedFixes": [
+              "Add explicit negative constraints",
+              "Include 2-3 few-shot examples with exact expected format",
+              "Add format validation rules",
+              "[SANDBOX] Connect GEMINI_API_KEY for AI-powered analysis"
+            ],
+            "previousOutput": "Hello! I would be happy to help you with product requirements. Let me first introduce myself as your friendly AI assistant.",
+            "pastedPrompt": "You are a product requirements assistant."
+          }
+        }
+      },
+      {
+        "id": "hist_g2us5bhrb",
+        "role": "assistant",
+        "content": "[SANDBOX] Testing Report: 6 simulated tests across gemini-2.0-flash, gemini-1.5-pro. Connect GEMINI_API_KEY for real execution.",
+        "timestamp": "2026-05-31T03:16:29.022Z",
+        "type": "test_run",
+        "metadata": {
+          "testRuns": [
+            {
+              "scenarioName": "Standard Input Test",
+              "inputs": {
+                "create": "Sample create content",
+                "productiongrade": "Sample productiongrade content"
+              },
+              "model": "gemini-2.0-flash",
+              "output": "[SANDBOX] Simulated output for \"Standard Input Test\" on gemini-2.0-flash. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            },
+            {
+              "scenarioName": "Standard Input Test",
+              "inputs": {
+                "create": "Sample create content",
+                "productiongrade": "Sample productiongrade content"
+              },
+              "model": "gemini-1.5-pro",
+              "output": "[SANDBOX] Simulated output for \"Standard Input Test\" on gemini-1.5-pro. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            },
+            {
+              "scenarioName": "Edge Case: Empty Input",
+              "inputs": {
+                "create": "",
+                "productiongrade": ""
+              },
+              "model": "gemini-2.0-flash",
+              "output": "[SANDBOX] Simulated output for \"Edge Case: Empty Input\" on gemini-2.0-flash. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            },
+            {
+              "scenarioName": "Edge Case: Empty Input",
+              "inputs": {
+                "create": "",
+                "productiongrade": ""
+              },
+              "model": "gemini-1.5-pro",
+              "output": "[SANDBOX] Simulated output for \"Edge Case: Empty Input\" on gemini-1.5-pro. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            },
+            {
+              "scenarioName": "Complex Multipart Input",
+              "inputs": {
+                "create": "Complex create with special chars",
+                "productiongrade": "Complex productiongrade with special chars"
+              },
+              "model": "gemini-2.0-flash",
+              "output": "[SANDBOX] Simulated output for \"Complex Multipart Input\" on gemini-2.0-flash. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            },
+            {
+              "scenarioName": "Complex Multipart Input",
+              "inputs": {
+                "create": "Complex create with special chars",
+                "productiongrade": "Complex productiongrade with special chars"
+              },
+              "model": "gemini-1.5-pro",
+              "output": "[SANDBOX] Simulated output for \"Complex Multipart Input\" on gemini-1.5-pro. Real execution requires GEMINI_API_KEY.",
+              "evalVerdict": "partial",
+              "score": 65,
+              "explanation": "[SANDBOX] Simulated evaluation. Prompt has 2 variables and 2 examples. Connect API for real scoring."
+            }
+          ]
+        }
+      }
+    ],
+    "currentPrompt": {
+      "id": "pdef_umnfyzydh",
+      "version": 2,
+      "systemInstruction": "You are a product requirements assistant.\n\n# SANDBOX AUTO-PATCH\n- Enforce strict output format\n- Reject conversational padding\n- Validate outputs against expected schema",
+      "userTemplate": "Provide analysis for: {{create}} with context: {{productiongrade}}",
+      "variables": [
+        "create",
+        "productiongrade"
+      ],
+      "examples": [
+        {
+          "id": "ex_sb_1",
+          "input": "Sample create input",
+          "output": "Structured response addressing create with clear formatting."
+        },
+        {
+          "id": "ex_sb_2",
+          "input": "Edge case: empty productiongrade",
+          "output": "Assumption: No productiongrade provided. Proceeding with defaults."
+        }
+      ],
+      "createdAt": "2026-05-31T03:16:28.970Z",
+      "scores": {
+        "clarity": 70,
+        "constraintAdherence": 72,
+        "edgeCases": 65,
+        "tokenEfficiency": 70,
+        "overall": 69
+      },
+      "scoringFeedback": {
+        "clarity": "[SANDBOX] Template patch.",
+        "constraintAdherence": "[SANDBOX] Basic constraints.",
+        "edgeCases": "[SANDBOX] Minimal guards.",
+        "tokenEfficiency": "[SANDBOX] Standard."
+      }
+    },
+    "versionHistory": [
+      {
+        "id": "pdef_oplh7acv9",
+        "version": 1,
+        "systemInstruction": "You are a specialized AI assistant designed for: Create a production-grade system prompt for a Google AI Studio assistant that helps product managers write data-backed product requirements..\n\nCRITICAL CONSTRAINTS:\n- Respond only with structured, actionable content directly addressing the user's request.\n- Do NOT include greetings, pleasantries, or meta-commentary.\n- Use clear section headers and bullet points for readability.\n- If the input is ambiguous, state assumptions explicitly.\n- Always validate output matches the expected format.\n\n[SANDBOX MODE: Generated without Gemini API. Add GEMINI_API_KEY for AI-powered optimization.]",
+        "userTemplate": "Provide analysis for: {{create}} with context: {{productiongrade}}",
+        "variables": [
+          "create",
+          "productiongrade"
+        ],
+        "examples": [
+          {
+            "id": "ex_sb_1",
+            "input": "Sample create input",
+            "output": "Structured response addressing create with clear formatting."
+          },
+          {
+            "id": "ex_sb_2",
+            "input": "Edge case: empty productiongrade",
+            "output": "Assumption: No productiongrade provided. Proceeding with defaults."
+          }
+        ],
+        "createdAt": "2026-05-31T03:16:14.249Z",
+        "scores": {
+          "clarity": 72,
+          "constraintAdherence": 68,
+          "edgeCases": 60,
+          "tokenEfficiency": 75,
+          "overall": 69
+        },
+        "scoringFeedback": {
+          "clarity": "[SANDBOX] Template-based structure. Connect Gemini API for real scoring.",
+          "constraintAdherence": "[SANDBOX] Basic negative constraints included.",
+          "edgeCases": "[SANDBOX] Minimal coverage. Real optimization adds comprehensive guards.",
+          "tokenEfficiency": "[SANDBOX] Standard token layout."
+        }
+      },
+      {
+        "id": "pdef_umnfyzydh",
+        "version": 2,
+        "systemInstruction": "You are a product requirements assistant.\n\n# SANDBOX AUTO-PATCH\n- Enforce strict output format\n- Reject conversational padding\n- Validate outputs against expected schema",
+        "userTemplate": "Provide analysis for: {{create}} with context: {{productiongrade}}",
+        "variables": [
+          "create",
+          "productiongrade"
+        ],
+        "examples": [
+          {
+            "id": "ex_sb_1",
+            "input": "Sample create input",
+            "output": "Structured response addressing create with clear formatting."
+          },
+          {
+            "id": "ex_sb_2",
+            "input": "Edge case: empty productiongrade",
+            "output": "Assumption: No productiongrade provided. Proceeding with defaults."
+          }
+        ],
+        "createdAt": "2026-05-31T03:16:28.970Z",
+        "scores": {
+          "clarity": 70,
+          "constraintAdherence": 72,
+          "edgeCases": 65,
+          "tokenEfficiency": 70,
+          "overall": 69
+        },
+        "scoringFeedback": {
+          "clarity": "[SANDBOX] Template patch.",
+          "constraintAdherence": "[SANDBOX] Basic constraints.",
+          "edgeCases": "[SANDBOX] Minimal guards.",
+          "tokenEfficiency": "[SANDBOX] Standard."
+        }
+      }
+    ]
+  }
+}
