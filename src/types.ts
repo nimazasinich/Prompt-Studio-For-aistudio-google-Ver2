@@ -100,6 +100,9 @@ export interface EcosystemIntegrationState {
     repoName?: string;
     branch?: string;
     lastCommitHash?: string;
+    syncStatus?: string;
+    syncTime?: string | null;
+    mode?: "REAL" | "SANDBOX";
   };
   huggingFace: {
     connected: boolean;

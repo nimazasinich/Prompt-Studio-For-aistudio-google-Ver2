@@ -82,10 +82,25 @@ export default function App() {
   const [isAnalyzingFeedback, setIsAnalyzingFeedback] = useState(false);
   const [feedbackAnalysisResult, setFeedbackAnalysisResult] = useState<any>(null);
 
+  const [diagnosticsData, setDiagnosticsData] = useState<any>(null);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+
+  const fetchDiagnostics = async () => {
+    try {
+      const res = await fetch("/api/diagnostics");
+      if (res.ok) {
+        setDiagnosticsData(await res.json());
+      }
+    } catch (err) {
+      console.error("Failed to fetch diagnostics:", err);
+    }
+  };
+
   useEffect(() => {
     checkApiHealth();
     loadSessions();
     fetchGithubMetadata();
+    fetchDiagnostics();
   }, []);
 
   const fetchGithubMetadata = async () => {
@@ -856,24 +871,60 @@ export default function App() {
         {/* Sub-Footer Status */}
         <footer className="mt-1 flex flex-col sm:flex-row justify-between items-center border-t border-white/5 py-2 select-none gap-2 shrink-0">
           <div className="flex flex-wrap gap-4 items-center text-[9px] font-mono text-white/40 uppercase tracking-widest">
-            <div className="flex items-center gap-1">
+            <button className="flex items-center gap-1 cursor-pointer hover:text-white/60 transition-colors" onClick={() => { fetchDiagnostics(); setShowDiagnostics(!showDiagnostics); }}>
               <div className="w-1 h-1 bg-[#6CECC8] rounded-full shadow-[0_0_4px_#6cecc8]"></div>
               <span>Server: <span className="text-white">ACTIVE</span></span>
-            </div>
+            </button>
             <div className="flex items-center gap-1">
               <div className="w-1 h-1 bg-[#79AEFF] rounded-full shadow-[0_0_4px_#79aeff]"></div>
-              <span>RAG Pipeline: <span className="text-[#79AEFF]">OPTIMIZED</span></span>
+              <span>RAG: <span className="text-[#79AEFF]">READY</span></span>
             </div>
-            <div className="flex items-center gap-1 text-emerald-500">
-              <div className="w-1 h-1 bg-[#6CECC8] rounded-full animate-pulse shadow-[0_0_4px_#6cecc8]"></div>
-              <span>Self-Correction Loop: <span className="font-extrabold uppercase animate-pulse text-[#6CECC8]">RUNNING</span></span>
+            <div className="flex items-center gap-1">
+              <div className={`w-1 h-1 rounded-full ${apiHealthy ? "bg-[#6CECC8] shadow-[0_0_4px_#6cecc8]" : "bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.5)]"}`}></div>
+              <span>Gemini: <span className={apiHealthy ? "text-[#6CECC8]" : "text-amber-400"}>{apiHealthy ? "ACTIVE" : "SANDBOX"}</span></span>
             </div>
           </div>
           <div className="text-[9px] uppercase font-mono text-white/35">
-            SESSION_ID &rarr; <span className="text-[#6CECC8] font-bold tracking-wider">{activeSessionId ? activeSessionId.toUpperCase() : "G-STUDIO-8891-X"}</span>
+            SESSION &rarr; <span className="text-[#6CECC8] font-bold tracking-wider">{activeSessionId ? activeSessionId.toUpperCase() : "NO SESSION"}</span>
           </div>
         </footer>
       </div>
+
+      {/* Runtime Diagnostics Panel */}
+      {showDiagnostics && diagnosticsData && (
+        <div className="fixed bottom-16 right-4 z-40 w-80 bg-[#07101F]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden animate-fade-in font-mono text-[9px]">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-[#040910]/60">
+            <span className="text-[#6CECC8] font-black uppercase tracking-wider text-[10px]">Runtime Diagnostics</span>
+            <button onClick={() => setShowDiagnostics(false)} className="text-white/40 hover:text-white p-0.5 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
+          </div>
+          <div className="p-3 space-y-1.5 max-h-72 overflow-y-auto text-[#9BAAD4]">
+            <div className="flex justify-between"><span className="text-white/30">Server</span><span className={`font-bold ${diagnosticsData.server?.status === "ACTIVE" ? "text-[#6CECC8]" : "text-red-400"}`}>{diagnosticsData.server?.status}</span></div>
+            <div className="flex justify-between"><span className="text-white/30">Gemini API</span><span className={`font-bold ${diagnosticsData.geminiApi?.status === "ACTIVE" ? "text-[#6CECC8]" : "text-amber-400"}`}>{diagnosticsData.geminiApi?.status}</span></div>
+            <div className="flex justify-between"><span className="text-white/30">GitHub</span><span className={`font-bold ${diagnosticsData.github?.status === "CONNECTED" ? "text-[#6CECC8]" : "text-white/40"}`}>{diagnosticsData.github?.status}</span></div>
+            <div className="flex justify-between"><span className="text-white/30">Google OAuth</span><span className={`font-bold ${diagnosticsData.googleOAuth?.status === "CONFIGURED" ? "text-[#6CECC8]" : "text-white/40"}`}>{diagnosticsData.googleOAuth?.status}</span></div>
+            {diagnosticsData.features && (
+              <div className="border-t border-white/5 pt-1.5 mt-1">
+                <span className="text-white/30 block mb-1">Features:</span>
+                {Object.entries(diagnosticsData.features).map(([key, val]) => (
+                  <div key={key} className="flex justify-between pl-2">
+                    <span className="text-white/25 truncate">{key}</span>
+                    <span className={`font-bold ${val === "ACTIVE" ? "text-[#6CECC8]" : val === "SANDBOX" ? "text-amber-400" : "text-white/40"}`}>{val as string}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-between"><span className="text-white/30">Sessions</span><span className="text-white font-bold">{diagnosticsData.storage?.sessionCount}</span></div>
+            {diagnosticsData.missingCredentials && diagnosticsData.missingCredentials.length > 0 && (
+              <div className="border-t border-white/5 pt-1.5 mt-1">
+                <span className="text-amber-400/70 block mb-1">Missing Credentials:</span>
+                {diagnosticsData.missingCredentials.map((c: string) => (
+                  <div key={c} className="text-amber-400/50 pl-2">- {c}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Pop-up Ecosystem settings modal overlay */}
       {isSettingsOpen && (

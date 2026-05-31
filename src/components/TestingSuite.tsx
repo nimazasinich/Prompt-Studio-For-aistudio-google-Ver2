@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   PlaySquare,
   Plus,
@@ -20,7 +20,8 @@ import {
   ShieldAlert,
   Sliders,
   Check,
-  Undo2
+  Undo2,
+  Loader2
 } from "lucide-react";
 import { PromptDefinition, TestScenario } from "../types";
 
@@ -57,11 +58,45 @@ export default function TestingSuite({
   const [customCriteria, setCustomCriteria] = useState("");
   const [selectedModels, setSelectedModels] = useState<string[]>(["gemini-2.0-flash", "gemini-2.5-pro"]);
 
-  // Self-Correction Loop states
   const [isSelfCorrectingModalOpen, setIsSelfCorrectingModalOpen] = useState(false);
   const [selfCorrectionState, setSelfCorrectionState] = useState<"idle" | "analyzing" | "preview" | "err">("idle");
   const [selfCorrectionResult, setSelfCorrectionResult] = useState<any>(null);
   const [correctionError, setCorrectionError] = useState<string>("");
+
+  const PIPELINE_STAGES = [
+    "Initializing",
+    "Loading model profiles",
+    "Running comparisons",
+    "Scoring outputs",
+    "Finalizing report"
+  ];
+  const [progressStage, setProgressStage] = useState(0);
+  const [wasRunning, setWasRunning] = useState(false);
+  const stageTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (isRunning && !wasRunning) {
+      setWasRunning(true);
+      setProgressStage(0);
+      stageTimerRef.current = setInterval(() => {
+        setProgressStage(prev => {
+          if (prev < PIPELINE_STAGES.length - 1) return prev + 1;
+          return prev;
+        });
+      }, 2200);
+    }
+    if (!isRunning && wasRunning) {
+      setWasRunning(false);
+      if (stageTimerRef.current) {
+        clearInterval(stageTimerRef.current);
+        stageTimerRef.current = null;
+      }
+      setProgressStage(0);
+    }
+    return () => {
+      if (stageTimerRef.current) clearInterval(stageTimerRef.current);
+    };
+  }, [isRunning]);
 
   if (!prompt) {
     return (
@@ -111,7 +146,6 @@ export default function TestingSuite({
     }
   };
 
-  // Trigger self-correct logic on backend
   const triggerSelfCorrectionProcess = async () => {
     setIsSelfCorrectingModalOpen(true);
     setSelfCorrectionState("analyzing");
@@ -143,7 +177,6 @@ export default function TestingSuite({
     }
   };
 
-  // Commit patched system prompt back into session workspace
   const applyPatchedPromptConfirm = () => {
     if (onUpdatePrompt && selfCorrectionResult?.patchedPrompt) {
       onUpdatePrompt(selfCorrectionResult.patchedPrompt);
@@ -220,7 +253,7 @@ export default function TestingSuite({
           {/* Scenarios List view */}
           <div className="space-y-2.5 max-h-48 overflow-y-auto">
             {scenarios.length === 0 ? (
-              <p className="text-[10px] text-[#9BAAD4]/40 italic uppercase tracking-wider font-semibold font-mono leading-relaxed">No custom test scenarios recorded. Add one below or trigger 'Auto Gen QA' to proceed autonomously.</p>
+              <p className="text-[10px] text-[#9BAAD4]/40 italic uppercase tracking-wider font-semibold font-mono leading-relaxed">No custom test scenarios recorded. Add one below or trigger &apos;Auto Gen QA&apos; to proceed autonomously.</p>
             ) : (
               scenarios.map((sc) => (
                 <div key={sc.id} className="p-3.5 rounded-xl border border-white/5 bg-[#040910]/45 relative group">
@@ -237,16 +270,49 @@ export default function TestingSuite({
             )}
           </div>
 
-          {/* Trigger active test run */}
+          {/* Trigger active test run with progress animation */}
           {scenarios.length > 0 && (
-            <button
-              onClick={() => onRunActiveTests(scenarios, selectedModels)}
-              disabled={isRunning}
-              className="w-full bg-emerald-500 text-black hover:bg-emerald-450 transition-all text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer tactile-glow"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`} />
-              <span>{isRunning ? "Running comparative evaluation..." : "Run Active Comparisons"}</span>
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => onRunActiveTests(scenarios, selectedModels)}
+                disabled={isRunning}
+                className={`w-full transition-all text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer relative overflow-hidden ${
+                  isRunning
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed"
+                    : "bg-emerald-500 text-black hover:bg-emerald-450 tactile-glow"
+                }`}
+              >
+                {isRunning && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/10 to-transparent animate-shimmer" />
+                )}
+                {isRunning ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                <span>{isRunning ? PIPELINE_STAGES[progressStage] + "..." : "Run Active Comparisons"}</span>
+              </button>
+              {isRunning && (
+                <div className="space-y-1.5 animate-fade-in">
+                  <div className="flex gap-0.5 h-1 rounded-full overflow-hidden bg-white/5">
+                    {PIPELINE_STAGES.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex-1 rounded-full transition-all duration-500 ${
+                          idx <= progressStage
+                            ? "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.3)]"
+                            : "bg-white/5"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9BAAD4]/40 uppercase tracking-widest select-none">
+                    <span>Stage {progressStage + 1}/{PIPELINE_STAGES.length}</span>
+                    <span className="text-emerald-400/60">{PIPELINE_STAGES[progressStage]}</span>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -287,7 +353,7 @@ export default function TestingSuite({
               <textarea
                 value={customCriteria}
                 onChange={(e) => setCustomCriteria(e.target.value)}
-                placeholder="e.g. Tone must remain apologetic&#10;No markdown list formats permitted"
+                placeholder={"e.g. Tone must remain apologetic\nNo markdown list formats permitted"}
                 className="w-full rounded-xl focus:outline-none px-4 py-2.5 h-20 glass-pane-input text-[#EDF2FF] font-mono uppercase placeholder:text-[#9BAAD4]/30 tracking-wider font-extrabold text-[10px] transition-all"
               />
             </div>
@@ -339,7 +405,7 @@ export default function TestingSuite({
             <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
               <RefreshCw className="h-10 w-10 text-emerald-500 animate-spin" />
               <p className="text-sm text-[#EDF2FF] font-bold uppercase tracking-wider animate-pulse font-syne">
-                Running comparative diagnostics & scoring execution outputs...
+                Running comparative diagnostics &amp; scoring execution outputs...
               </p>
               <p className="text-[10px] font-mono text-[#9BAAD4]/40 max-w-md leading-relaxed uppercase tracking-wider">
                 Evaluating side-by-side across the selected model configurations. This takes sequential steps for comprehensive audits.
@@ -352,7 +418,7 @@ export default function TestingSuite({
               <PlaySquare className="h-12 w-12 text-[#9BAAD4]/20 mb-3" />
               <p className="text-xs text-[#9BAAD4]/40 uppercase font-extrabold tracking-wider">No active audit logs recorded in current session</p>
               <p className="text-[10px] font-mono text-[#9BAAD4]/30 mt-2 max-w-sm uppercase tracking-wider leading-relaxed">
-                Create custom stress cases or run "Auto Gen QA" to evaluate constraint safety boundaries.
+                Create custom stress cases or run &quot;Auto Gen QA&quot; to evaluate constraint safety boundaries.
               </p>
             </div>
           )}
@@ -373,13 +439,11 @@ export default function TestingSuite({
                   const firstRun = runs[0];
                   return (
                     <div key={scenarioName} className="rounded-2xl border border-white/5 bg-[#040910]/45 overflow-hidden space-y-4 p-5 hover:border-emerald-550/25 transition-all">
-                      {/* Scenario Title Block */}
                       <div className="border-b border-white/5 pb-3">
                         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-[0.2em] block font-black mb-1">Comparative QA Scenario</span>
                         <h4 className="text-sm font-black text-[#EDF2FF] uppercase tracking-wider font-syne">{scenarioName}</h4>
                       </div>
 
-                      {/* Hydrated inputs once */}
                       <div className="space-y-1.5">
                         <span className="text-[9px] font-mono text-[#9BAAD4]/40 uppercase tracking-wider block font-bold">Hydrated Test Variables Input:</span>
                         <div className="rounded-xl p-3 bg-[#040910]/85 text-emerald-400 font-mono text-[9px] border border-white/5 uppercase font-bold leading-relaxed">
@@ -392,7 +456,6 @@ export default function TestingSuite({
                         </div>
                       </div>
 
-                      {/* Grid columns of different models side-by-side */}
                       <div className={`grid grid-cols-1 xl:grid-cols-${Math.min(runs.length, 3)} gap-4`}>
                         {runs.map((r, runIdx) => {
                           const isSuccess = r.evalVerdict === "pass";
@@ -401,7 +464,6 @@ export default function TestingSuite({
 
                           return (
                             <div key={runIdx} className="rounded-xl border border-white/5 bg-[#07101f]/35 p-4 space-y-3 font-sans">
-                              {/* Model information badge */}
                               <div className="flex justify-between items-center border-b border-white/5 pb-2">
                                 <span className="font-mono text-[9px] font-black text-[#EDF2FF] uppercase tracking-tight truncate max-w-[150px]">
                                   {r.model || "gemini-3.5-flash"}
@@ -428,7 +490,6 @@ export default function TestingSuite({
                                 </div>
                               </div>
 
-                              {/* Prompts results side-by-side outputs */}
                               <div className="space-y-1">
                                 <span className="text-[8.5px] font-mono text-[#9BAAD4]/30 uppercase tracking-widest block select-none">Output Response</span>
                                 <pre className="p-3 bg-[#040910]/75 text-slate-200 text-3xs font-mono rounded-xl border border-white/5 h-32 overflow-y-auto whitespace-pre-wrap leading-relaxed select-all shadow-inner">
@@ -436,7 +497,6 @@ export default function TestingSuite({
                                 </pre>
                               </div>
 
-                              {/* Auditor feedback */}
                               <div className="space-y-1 bg-[#040910]/65 p-3 rounded-xl border border-white/5 leading-relaxed">
                                 <span className="text-[8.5px] font-mono text-[#9BAAD4]/30 uppercase tracking-widest block font-bold select-none font-sans">QA Verifier Report</span>
                                 <p className="text-[9px] font-mono italic text-white/70 leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap">
@@ -456,14 +516,10 @@ export default function TestingSuite({
         </div>
       </div>
 
-      {/* --------------------------------------------------
-          SELF-CORRECTING SYNTHETIC OPTIMIZATION OVERLAY
-          -------------------------------------------------- */}
       {isSelfCorrectingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in font-sans">
           <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-[#040812] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
-            {/* Header */}
             <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#070f21]/70 select-none">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-pulse">
@@ -482,7 +538,6 @@ export default function TestingSuite({
               </button>
             </div>
 
-            {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
               {selfCorrectionState === "analyzing" && (
@@ -497,7 +552,6 @@ export default function TestingSuite({
                       Tracing semantic defects, parsing audit criteria, and generating instruction overrides to repair compliance failure modes.
                     </p>
                   </div>
-                  {/* Step indicators */}
                   <div className="space-y-2.5 text-[10px] font-mono tracking-widest uppercase w-64 mx-auto text-left">
                     <div className="flex items-center gap-2 text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -532,7 +586,6 @@ export default function TestingSuite({
               {selfCorrectionState === "preview" && selfCorrectionResult && (
                 <div className="space-y-6">
                   
-                  {/* Diagnosis Report Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/10 space-y-1.5 leading-relaxed">
                       <span className="text-[10px] font-mono uppercase text-red-400 font-bold tracking-wider block">Observed Bug Behavior</span>
@@ -544,7 +597,6 @@ export default function TestingSuite({
                     </div>
                   </div>
 
-                  {/* Fixes List */}
                   <div className="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-3">
                     <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-black block">Remediations Formulated</span>
                     <ul className="space-y-2 text-xs text-slate-200">
@@ -557,21 +609,18 @@ export default function TestingSuite({
                     </ul>
                   </div>
 
-                  {/* Instructions Diff Pane */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-mono uppercase text-[#9BAAD4]/50 tracking-wider">
                       <span>Interactive System Instructions Side-by-Side</span>
                       <span className="text-emerald-400 font-bold">New Version: v{selfCorrectionResult.patchedPrompt.version}</span>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {/* Old Instruction */}
                       <div className="space-y-1.5">
                         <span className="text-[9px] font-mono uppercase text-red-400 tracking-wider block">Before (Defective Instruction)</span>
                         <div className="p-4 rounded-2xl bg-black/60 border border-red-500/10 text-white/40 text-[10px] font-mono h-56 overflow-y-auto whitespace-pre-wrap leading-relaxed select-none">
                           {prompt?.systemInstruction}
                         </div>
                       </div>
-                      {/* Patched Instruction */}
                       <div className="space-y-1.5">
                         <span className="text-[9px] font-mono uppercase text-emerald-400 tracking-wider block">Proposed (Repaired Instruction)</span>
                         <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-300 text-[10px] font-mono h-56 overflow-y-auto whitespace-pre-wrap leading-relaxed select-all">
@@ -581,7 +630,6 @@ export default function TestingSuite({
                     </div>
                   </div>
 
-                  {/* Impact score previews */}
                   <div className="p-4 bg-[#070f21]/70 border border-white/5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex gap-4 text-xs font-mono">
                       <div>
@@ -598,7 +646,7 @@ export default function TestingSuite({
                       </div>
                     </div>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-bold">
-                      🛡️ Safe optimized patch generated. Retains variable integrity.
+                      Safe optimized patch generated. Retains variable integrity.
                     </span>
                   </div>
 
@@ -607,14 +655,13 @@ export default function TestingSuite({
 
             </div>
 
-            {/* Footer Actions */}
             {selfCorrectionState === "preview" && (
               <div className="p-6 border-t border-white/5 bg-[#070f21]/40 flex justify-end gap-3 select-none">
                 <button
                   onClick={() => setIsSelfCorrectingModalOpen(false)}
                   className="bg-transparent border border-white/10 hover:border-white/20 text-[#9BAAD4] hover:text-[#EDF2FF] px-5 py-2.5 rounded-xl text-xs uppercase font-extrabold tracking-widest transition-all cursor-pointer"
                 >
-                  Reject & Cancel
+                  Reject &amp; Cancel
                 </button>
                 <button
                   onClick={applyPatchedPromptConfirm}
